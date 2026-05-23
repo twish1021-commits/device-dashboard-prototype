@@ -1,0 +1,1913 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电玩城数字化看板 - 专业UX重构版</title>
+    <style>
+        :root {
+            --primary: #1677ff;
+            --primary-bg: #e6f7ff;
+            --primary-hover: #4096ff;
+            --neutral-dark: #141414;
+            --neutral-main: #262626;
+            --neutral-sub: #595959;
+            --neutral-gray: #8c8c8c;
+            --neutral-light: #f5f7fa;
+            --component-bg: #ffffff;
+            
+            /* 语义色 */
+            --success: #52c41a;
+            --success-bg: #f6ffed;
+            --success-border: #b7eb8f;
+            
+            --warning: #faad14;
+            --warning-bg: #fffbe6;
+            --warning-border: #ffe58f;
+            
+            --error: #ff4d4f;
+            --error-bg: #fff1f0;
+            --error-border: #ffccc7;
+
+            /* 机台专属标志色 */
+            --mn-color: #2f54eb;
+            --cp-color: #52c41a;
+            --zx-color: #fa8c16;
+            --lp-color: #eb2f96;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--neutral-light);
+            color: var(--neutral-main);
+            font-size: 16px;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-workbench {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* 后台系统菜单壳 */
+        .app-sidebar {
+            width: 264px;
+            display: flex;
+            flex-shrink: 0;
+            background: #eef5fc;
+            border-right: 1px solid #9db8d4;
+            z-index: 10;
+        }
+        .module-rail {
+            width: 72px;
+            background: #d8e9f8;
+            padding: 10px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            border-right: 1px solid #b9d0e8;
+        }
+        .rail-item {
+            height: 54px;
+            border-radius: 6px;
+            color: #586a7d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-size: 12px;
+            cursor: default;
+        }
+        .rail-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #718093;
+            color: #ffffff;
+            font-size: 15px;
+            line-height: 1;
+            font-weight: 700;
+        }
+        .rail-item.active {
+            background: #9ec8f1;
+            color: #0b5ea8;
+            font-weight: 700;
+        }
+        .rail-item.active .rail-icon {
+            background: #1677ff;
+            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.12);
+        }
+        .menu-panel {
+            width: 192px;
+            background: #ffffff;
+            color: #1f2d3d;
+            display: flex;
+            flex-direction: column;
+        }
+        .brand-strip {
+            display: none;
+            height: 56px;
+            align-items: center;
+            padding: 0 14px;
+            background: linear-gradient(90deg, #3ec6c7 0%, #2db5df 100%);
+            border-bottom: 1px solid #7daed3;
+        }
+        .brand-name {
+            font-size: 18px;
+            line-height: 1;
+            color: #064b91;
+            font-weight: 800;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+        .system-switch {
+            border: 0;
+            background: #ffd991;
+            color: #594000;
+            border-radius: 4px;
+            padding: 7px 10px;
+            font-size: 13px;
+            flex: 0 0 auto;
+        }
+        .menu-tree {
+            padding: 10px 10px 14px;
+            overflow-y: auto;
+            flex: 1;
+            font-size: 14px;
+        }
+        .tree-group {
+            margin-bottom: 8px;
+        }
+        .tree-title {
+            font-weight: 700;
+            color: #1b2b3f;
+            padding: 7px 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tree-title::before {
+            content: "›";
+            color: #315f89;
+            font-weight: 700;
+        }
+        .tree-group.expanded .tree-title::before {
+            content: "⌄";
+        }
+        .tree-link {
+            height: 30px;
+            padding: 0 10px 0 22px;
+            display: flex;
+            align-items: center;
+            color: #2e3d4f;
+            border-radius: 4px;
+            cursor: default;
+            white-space: nowrap;
+        }
+        .tree-link.active {
+            background: #e7f1ff;
+            color: #0b63ce;
+            font-weight: 700;
+        }
+        .tree-link.standalone {
+            margin-bottom: 6px;
+            padding-left: 10px;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+        .top-bar {
+            background: linear-gradient(90deg, #3ec6c7 0%, #2db5df 100%);
+            padding: 0 24px;
+            height: 58px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            border-bottom: 1px solid #7daed3;
+            flex-shrink: 0;
+        }
+        .breadcrumb { display: none; font-size: 15px; color: #063f70; font-weight: 600; }
+        .breadcrumb span { color: rgba(6,63,112,0.58); margin: 0 4px; }
+        .top-actions { display: flex; align-items: center; gap: 18px; color: #ffffff; font-size: 14px; width: 100%; }
+        .top-logo {
+            color: #064b91;
+            font-size: 21px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            margin-right: 4px;
+        }
+        .global-search {
+            width: 210px;
+            height: 30px;
+            border-radius: 16px;
+            border: 0;
+            padding: 0 14px;
+            outline: none;
+        }
+        .user-info { font-size: 14px; color: #ffffff; font-weight: 600; }
+
+        .content-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .workspace-tabs {
+            height: 28px;
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            background: #c8d8ea;
+            border-bottom: 1px solid #89a9cc;
+            padding: 0 8px;
+            flex-shrink: 0;
+        }
+        .workspace-tab {
+            height: 25px;
+            min-width: 86px;
+            padding: 0 10px;
+            border: 1px solid #8faed0;
+            border-bottom: 0;
+            background: #dce9f8;
+            color: #123b64;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 13px;
+            border-radius: 3px 3px 0 0;
+        }
+        .workspace-tab.active {
+            background: #ffffff;
+            font-weight: 700;
+        }
+        .tab-close {
+            color: #58708a;
+            font-weight: 700;
+        }
+
+        /* 顶部标题与控制组件 */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .page-title { font-size: 24px; font-weight: 600; color: var(--neutral-dark); }
+        .header-controls { display: flex; align-items: center; gap: 16px; }
+        
+        .time-filter {
+            display: none;
+            background: #fff;
+            padding: 2px;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+        }
+        .time-btn {
+            padding: 5px 14px;
+            font-size: 14px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 4px;
+            color: var(--neutral-sub);
+            transition: all 0.2s;
+        }
+        /* 核心修复：按钮选中效果确保为白色字体 */
+        .time-btn.active, .sub-tab-btn.active, .sort-btn.active {
+            background-color: var(--primary) !important;
+            color: #ffffff !important;
+            font-weight: 500;
+        }
+        
+        .refresh-zone { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--neutral-gray); }
+        .refresh-btn {
+            padding: 5px 14px;
+            background: #fff;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .refresh-btn:hover { color: var(--primary); border-color: var(--primary); }
+
+        /* 页签系统 */
+        .tab-container {
+            display: flex;
+            gap: 4px;
+            background: #e4e7ed;
+            padding: 3px;
+            border-radius: 8px;
+            width: fit-content;
+        }
+        .tab-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .tab-item {
+            padding: 6px 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--neutral-sub);
+            position: relative;
+            transition: all 0.2s;
+        }
+        .tab-item.active {
+            background: #ffffff;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+        .badge-dot::after {
+            content: ''; position: absolute; top: 4px; right: 6px; width: 6px; height: 6px; background-color: var(--error); border-radius: 50%;
+        }
+        .data-note-btn {
+            border: 1px solid #d9d9d9;
+            background: #ffffff;
+            color: var(--neutral-sub);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .data-note-btn:hover { color: var(--primary); border-color: var(--primary); }
+
+        /* 区块容器 */
+        .block-section {
+            margin-bottom: 24px;
+            background: #fff;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .block-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .block-title .title-left { display: flex; align-items: center; gap: 6px; }
+        .block-title .title-left::before {
+            content: ''; width: 3px; height: 14px; background: var(--primary); border-radius: 2px;
+        }
+        .block-title .sub-txt { font-size: 14px; color: var(--neutral-gray); font-weight: normal; margin-left: 6px; }
+
+        /* 紧凑响应式电玩机矩阵网格 - 游戏机5列紧凑排列防止体积过大 */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(160px, 1fr));
+            gap: 10px;
+        }
+        .card-grid.game-compact {
+            grid-template-columns: repeat(6, minmax(145px, 1fr));
+            align-items: start;
+        }
+
+        /* 电玩城机台适配形状卡片 */
+        .device-card {
+            background: #ffffff;
+            border: 1px solid #e8e8e8;
+            border-top: 4px solid var(--primary);
+            border-radius: 6px 6px 8px 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 118px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            position: relative;
+            overflow: hidden;
+        }
+        .device-card:not(.offline) { cursor: default; }
+        .device-card:not(.offline):hover {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .device-card.offline { background-color: #f7f7f7; border-top-color: var(--neutral-gray) !important; cursor: not-allowed; }
+        .card-cashier, .card-self, .card-project, .card-mn, .card-cp, .card-zx, .card-lp {
+            min-height: 146px;
+            border-radius: 8px;
+            clip-path: none;
+        }
+        .card-cp, .card-lp {
+            height: 276px;
+            justify-content: flex-start;
+        }
+        .card-mn, .card-zx {
+            min-height: 178px;
+            justify-content: flex-start;
+        }
+        .card-self { border-top-color: #13c2c2; }
+        .card-project { border-top-color: #722ed1; }
+        .offline-placeholder {
+            margin-top: auto;
+            color: var(--neutral-gray);
+            background: #f0f0f0;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* 匹配机型头部色彩条装饰 */
+        .card-mn { border-top-color: var(--mn-color); }
+        .card-cp { border-top-color: var(--cp-color); }
+        .card-zx { border-top-color: var(--zx-color); }
+        .card-lp { border-top-color: var(--lp-color); }
+
+        .card-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .card-title-group { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .device-icon {
+            width: 66px;
+            height: 54px;
+            border: none;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            flex: 0 0 auto;
+            position: relative;
+            box-shadow: inset 0 0 0 1px #edf1f6;
+        }
+        .device-icon::before, .device-icon::after {
+            content: none;
+        }
+        .icon-cashier { background-image: url("assets/device-icons/cashier-pos.png"); }
+        .icon-self { background-image: url("assets/device-icons/self-kiosk.png"); }
+        .icon-game { background-image: url("assets/device-icons/arcade-game.png"); }
+        .icon-project { background-image: url("assets/device-icons/project-gate.png"); }
+        .device-name { font-weight: 600; font-size: 15px; color: var(--neutral-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .device-name.action-link {
+            color: #0958d9;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            text-decoration-thickness: 1px;
+        }
+        .device-name.action-link:hover { color: var(--primary-hover); }
+        .device-no { font-size: 13px; color: var(--neutral-gray); margin-bottom: 6px; }
+        .device-meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        .p-count-tag {
+            font-size: 12px;
+            color: #24537d;
+            background: #edf6ff;
+            border: 1px solid #b8d8ff;
+            border-radius: 4px;
+            padding: 1px 6px;
+            white-space: nowrap;
+        }
+
+        .status-badge { font-size: 12px; padding: 2px 6px; border-radius: 3px; font-weight: 500; }
+        .status-badge.online { background: var(--success-bg); color: var(--success); }
+        .status-badge.offline { background: #eee; color: var(--neutral-gray); }
+
+        .alarm-badge-click {
+            background: var(--error-bg); border: 1px solid var(--error-border); color: var(--error);
+            border-radius: 3px; font-size: 12px; padding: 1px 5px; cursor: pointer;
+        }
+
+        /* 卡片内部卡片微切换微标（解决数据平铺太多核心组件） */
+        .card-micro-switcher {
+            display: flex;
+            background: #eee;
+            padding: 2px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            width: 100%;
+            flex: 0 0 auto;
+        }
+        .micro-tab {
+            flex: 1; text-align: center; font-size: 12px; padding: 3px 0; border-radius: 3px; color: var(--neutral-sub); border: none; background: none; cursor: pointer;
+            min-width: 0;
+            white-space: nowrap;
+        }
+        .micro-tab.active { background: #fff; color: var(--primary); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+        /* 紧凑数据双列布局 */
+        .card-data-zone {
+            display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 36px; gap: 5px 8px; font-size: 14px;
+            background: #f8fafc; padding: 7px; border-radius: 5px; margin-bottom: 5px;
+            min-height: 98px;
+            align-content: start;
+        }
+        .card-cp .card-data-zone, .card-lp .card-data-zone {
+            height: 158px;
+            min-height: 158px;
+        }
+        .data-item { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+        .data-label { color: var(--neutral-gray); font-size: 13px; margin-bottom: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .data-val {
+            width: fit-content;
+            max-width: 100%;
+            font-weight: 700;
+            color: var(--neutral-main);
+            font-size: 16px;
+            line-height: 22px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-variant-numeric: tabular-nums;
+        }
+        .data-val.clickable, .metric-link {
+            color: #0958d9;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            text-decoration-thickness: 1px;
+            background: #eef5ff;
+            border: 1px solid #b8d8ff;
+            border-radius: 4px;
+            padding: 0 5px;
+        }
+        .data-val.clickable:hover, .metric-link:hover {
+            color: var(--primary-hover);
+            background: #d9ecff;
+            border-color: #69b1ff;
+        }
+        .data-val.blue-highlight { color: var(--primary); }
+
+        .warning-zone { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
+        .warn-tag-capsule { font-size: 12px; padding: 2px 5px; border-radius: 3px; }
+        .warn-tag-capsule.orange { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning-border); }
+        .warn-tag-capsule.red { background: var(--error-bg); color: var(--error); border: 1px solid var(--error-border); }
+
+        /* 游戏机顶部暗调汇总看板 */
+        .game-summary-board {
+            background: linear-gradient(135deg, #001529 0%, #002140 100%);
+            color: #ffffff; border-radius: 10px; padding: 16px 20px;
+            display: flex; justify-content: space-between; margin-bottom: 16px;
+        }
+        .summary-item { flex: 1; text-align: center; border-right: 1px solid rgba(255,255,255,0.15); }
+        .summary-item:last-child { border-right: none; }
+        .summary-label { font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
+        .summary-val { font-size: 24px; font-weight: 700; }
+        .summary-val.action-link {
+            color: #ffffff;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+        .summary-val.clickable-alarm { color: #ff7875; cursor: pointer; text-decoration: underline; }
+
+        .game-toolbar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #fafafa; padding: 8px 12px; border: 1px solid #e8e8e8; border-radius: 8px; margin-bottom: 16px;
+        }
+        .game-toolbar.compact-hidden { display: none; }
+        .sub-tabs, .sort-bar { display: flex; gap: 6px; }
+        .sub-tab-btn, .sort-btn {
+            padding: 6px 13px; font-size: 14px; border: 1px solid #d9d9d9; background: #fff; cursor: pointer; border-radius: 6px; color: var(--neutral-sub);
+        }
+        .sort-btn .sort-arrow { margin-left: 4px; font-weight: 700; }
+
+        @media (max-width: 1280px) {
+            .card-grid { grid-template-columns: repeat(4, minmax(160px, 1fr)); }
+            .card-grid.game-compact { grid-template-columns: repeat(5, minmax(145px, 1fr)); }
+        }
+
+        .group-header-tag { font-size: 13px; padding: 1px 6px; border-radius: 3px; margin-left: 8px; font-weight: 500; }
+
+        /* 机种全卡片化方案重构 */
+        .model-grid {
+            display: grid; grid-template-columns: repeat(5, minmax(170px, 1fr)); gap: 12px;
+        }
+        .model-card {
+            min-height: 244px;
+        }
+        .model-card.card-mn, .model-card.card-zx { min-height: 178px; }
+        .model-card .model-tag-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
+        .model-count-tag, .model-type-tag { font-size: 12px; font-weight: normal; color: var(--neutral-gray); background: #f5f5f5; padding: 2px 6px; border-radius: 4px; }
+        .model-type-tag { color: var(--primary); background: var(--primary-bg); }
+
+        /* 模态弹窗 */
+        .modal-mask {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.45);
+            display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+        }
+        .modal-mask.show { opacity: 1; pointer-events: auto; }
+        .modal-wrapper { background: #ffffff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh; transform: scale(0.95); transition: transform 0.2s; }
+        .modal-mask.show .modal-wrapper { transform: scale(1); }
+        .modal-header { padding: 14px 20px; font-size: 15px; font-weight: 600; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
+        .modal-close { cursor: pointer; font-size: 20px; color: var(--neutral-gray); }
+        .modal-content { padding: 20px; overflow: auto; }
+        .metric-doc {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(260px, 1fr));
+            gap: 14px;
+            font-size: 14px;
+        }
+        .metric-doc-section {
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+            padding: 12px 14px;
+            background: #fff;
+        }
+        .metric-doc-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--neutral-dark);
+        }
+        .metric-doc-line {
+            display: grid;
+            grid-template-columns: 88px 1fr;
+            gap: 8px;
+            line-height: 1.55;
+            padding: 3px 0;
+        }
+        .metric-doc-name { font-weight: 600; color: var(--neutral-main); }
+        .metric-doc-desc { color: var(--neutral-sub); }
+
+        .report-context {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+        .context-chip {
+            background: #eef5ff;
+            border: 1px solid #b8d8ff;
+            color: #174a7c;
+            border-radius: 4px;
+            padding: 5px 8px;
+        }
+        .hidden-filter-note {
+            margin-bottom: 14px;
+            padding: 9px 10px;
+            background: #fffbe6;
+            border: 1px solid #ffe58f;
+            border-radius: 6px;
+            color: #775900;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .report-filter-panel {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(210px, 1fr));
+            gap: 9px 18px;
+            margin-bottom: 8px;
+            padding: 12px 14px;
+            border: 1px solid #9cb8d8;
+            background: #f7fbff;
+        }
+        .filter-field {
+            display: grid;
+            grid-template-columns: 88px 1fr;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #1f2d3d;
+        }
+        .filter-control {
+            height: 24px;
+            border: 1px solid #89a9cc;
+            background: #ffffff;
+            padding: 0 8px;
+            color: #334e68;
+            min-width: 0;
+        }
+        .report-actions {
+            display: flex;
+            gap: 8px;
+            margin: 0 0 14px 102px;
+        }
+        .report-action-btn {
+            min-width: 74px;
+            height: 26px;
+            border: 1px solid #8faed0;
+            border-radius: 4px;
+            background: #dceaf8;
+            color: #123b64;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .report-action-btn.primary {
+            background: #2f80ed;
+            border-color: #2f80ed;
+            color: #ffffff;
+        }
+        .report-tabs {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 0;
+        }
+        .report-tab {
+            border: 1px solid #91abc8;
+            border-bottom: 0;
+            background: #dceaf8;
+            color: #0f3760;
+            padding: 5px 10px;
+            font-size: 13px;
+            border-radius: 4px 4px 0 0;
+        }
+        .report-tab.active {
+            background: #ffffff;
+            font-weight: 700;
+        }
+        .proto-table.report-table th {
+            background: #eaf3fc;
+            color: #123a63;
+            border-color: #9cb8d8;
+            padding: 6px 8px;
+            white-space: nowrap;
+        }
+        .proto-table.report-table td {
+            border-color: #c7d9ef;
+            padding: 6px 8px;
+            white-space: nowrap;
+        }
+        .report-table-wrap {
+            max-width: 100%;
+            overflow: auto;
+            border: 1px solid #c7d9ef;
+            border-top: 0;
+        }
+        .report-table-wrap .proto-table.report-table th,
+        .report-table-wrap .proto-table.report-table td {
+            border-top: 0;
+        }
+        .report-table-wrap .sticky-col {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background: #ffffff;
+            box-shadow: 1px 0 0 #9cb8d8;
+        }
+        .report-table-wrap th.sticky-col {
+            background: #eaf3fc;
+            z-index: 3;
+        }
+        .report-table-wrap .sticky-col-2 {
+            left: 104px;
+        }
+        .report-empty {
+            height: 240px;
+            color: #8c8c8c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #c7d9ef;
+            border-top: 0;
+            font-size: 14px;
+        }
+        .message-center {
+            width: 100%;
+            background: #eef4ff;
+            padding: 6px 6px 14px;
+            color: #1f2d3d;
+        }
+        .message-tabs {
+            display: flex;
+            gap: 0;
+            margin: 8px 0 20px;
+        }
+        .message-tab {
+            min-width: 120px;
+            height: 40px;
+            border: 1px solid #2f80ed;
+            background: #ffffff;
+            color: #0b63ce;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        .message-tab.active {
+            background: #2f80ed;
+            color: #ffffff;
+        }
+        .message-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin: -52px 4px 30px;
+        }
+        .message-link {
+            border: 0;
+            background: transparent;
+            color: #0b63ce;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .message-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            font-size: 14px;
+        }
+        .message-table th,
+        .message-table td {
+            border: 1px solid #d4ddec;
+            padding: 10px 12px;
+            text-align: left;
+        }
+        .message-table th {
+            background: #e9eef8;
+            color: #5b677a;
+            font-size: 15px;
+        }
+        .message-empty {
+            height: 230px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #7a8496;
+            background: #ffffff;
+            border: 1px solid #d4ddec;
+            border-top: 0;
+        }
+        .message-empty-icon {
+            width: 34px;
+            height: 34px;
+            border: 3px solid #a6a9ae;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #a6a9ae;
+            font-size: 22px;
+        }
+        .read-btn {
+            border: 1px solid #2f80ed;
+            color: #0b63ce;
+            background: #ffffff;
+            border-radius: 4px;
+            padding: 3px 8px;
+            cursor: pointer;
+        }
+
+        .proto-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .proto-table th, .proto-table td { border: 1px solid #f0f0f0; padding: 10px 12px; }
+        .proto-table th { background-color: #fafafa; font-weight: 600; }
+
+        .alarm-detail-item { border: 1px solid #f0f0f0; border-radius: 6px; padding: 10px 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; background: #fafafa; }
+        .alarm-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .alarm-dot.red { background-color: var(--error); }
+        .alarm-dot.orange { background-color: var(--warning); }
+
+        .toast {
+            position: fixed; top: 24px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.85); color: #fff;
+            padding: 8px 20px; border-radius: 6px; font-size: 13px; z-index: 2000; display: none;
+        }
+        .hidden-element { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="top-actions">
+            <div class="top-logo">世软科技</div>
+            <button class="system-switch">切换系统⌄</button>
+            <input class="global-search" placeholder="搜索">
+            <span>审批 <strong>99+</strong></span>
+            <span>下载</span>
+            <span>知识库</span>
+            <span>更多</span>
+            <span>2026/5/23<br>V2.5.8.1</span>
+            <div class="user-info">admin</div>
+        </div>
+    </div>
+
+    <div class="app-workbench">
+    <div class="app-sidebar">
+        <div class="module-rail">
+            <div class="rail-item"><span class="rail-icon">¥</span><span>营业</span></div>
+            <div class="rail-item"><span class="rail-icon">▣</span><span>套餐</span></div>
+            <div class="rail-item"><span class="rail-icon">◒</span><span>商品</span></div>
+            <div class="rail-item"><span class="rail-icon">%</span><span>营销</span></div>
+            <div class="rail-item"><span class="rail-icon">◆</span><span>会员</span></div>
+            <div class="rail-item"><span class="rail-icon">▥</span><span>报表</span></div>
+            <div class="rail-item active"><span class="rail-icon">▤</span><span>设备</span></div>
+            <div class="rail-item"><span class="rail-icon">⌘</span><span>小程序</span></div>
+            <div class="rail-item"><span class="rail-icon">✣</span><span>运动</span></div>
+            <div class="rail-item"><span class="rail-icon">⚙</span><span>设置</span></div>
+        </div>
+        <div class="menu-panel">
+            <div class="brand-strip">
+                <div class="brand-name">世软科技</div>
+            </div>
+            <div class="menu-tree">
+                <div class="tree-link standalone active">设备看板</div>
+                <div class="tree-group expanded">
+                    <div class="tree-title">扣费设备</div>
+                    <div class="tree-link">游戏机管理</div>
+                    <div class="tree-link">项目扣费终端</div>
+                    <div class="tree-link">区域基站</div>
+                    <div class="tree-link">地址卡管理</div>
+                    <div class="tree-link">卡头激活码</div>
+                    <div class="tree-link">游戏机库存管理</div>
+                    <div class="tree-link">区域设置</div>
+                </div>
+                <div class="tree-group expanded">
+                    <div class="tree-title">运营设备</div>
+                    <div class="tree-link">智能设备</div>
+                    <div class="tree-link">设备加币/清币</div>
+                    <div class="tree-link">设备加珠/清珠</div>
+                    <div class="tree-link">租赁项目</div>
+                </div>
+                <div class="tree-group"><div class="tree-title">氛围管理</div></div>
+                <div class="tree-group"><div class="tree-title">运动乐园</div></div>
+                <div class="tree-group"><div class="tree-title">查询</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="workspace-tabs">
+            <div class="workspace-tab active">设备看板 <span class="tab-close">×</span></div>
+        </div>
+
+        <div class="content-body">
+            
+            <div class="page-header">
+                <div class="page-title">设备看板</div>
+                <div class="header-controls">
+                    <div class="time-filter" id="topTimeFilter">
+                        <button class="time-btn active" onclick="switchTime(this)">今日</button>
+                        <button class="time-btn" onclick="switchTime(this)">昨日</button>
+                        <button class="time-btn" onclick="switchTime(this)">本周</button>
+                        <button class="time-btn" onclick="switchTime(this)">本月</button>
+                        <button class="time-btn" onclick="switchTime(this)">自定义</button>
+                    </div>
+                    <div class="refresh-zone">
+                        <span id="refreshTimeText">上次刷新时间：今日 18:19:28</span>
+                        <button class="refresh-btn" onclick="triggerRefresh()">刷新数据</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-row">
+                <div class="tab-container">
+                    <div class="tab-item active" onclick="switchMainTab('all', this)">全部</div>
+                    <div class="tab-item" onclick="switchMainTab('cashier', this)">收银台</div>
+                    <div class="tab-item" onclick="switchMainTab('self', this)">自助机</div>
+                    <div class="tab-item" onclick="switchMainTab('game', this)">游戏机</div>
+                    <div class="tab-item" onclick="switchMainTab('project', this)">大项目</div>
+                    <div class="tab-item badge-dot" onclick="switchMainTab('offline', this)">离线设备</div>
+                </div>
+                <button class="data-note-btn" onclick="openModal('metricDoc')">看板取数说明</button>
+            </div>
+
+            <div id="dynamicContentBlock"></div>
+
+        </div>
+    </div>
+    </div>
+
+    <!-- 模态框中控 -->
+    <div class="modal-mask" id="protoModalMask" onclick="closeModal()">
+        <div class="modal-wrapper" id="modalWrapper" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span id="modalTitle">机台详情</span>
+                <span class="modal-close" onclick="closeModal()">×</span>
+            </div>
+            <div class="modal-content" id="modalDynamicContent"></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toastMessage">提示</div>
+
+    <script>
+        let currentTab = 'all';
+        let currentGameSubView = 'type'; 
+        let currentGameSortKey = 'coin';
+        let currentGameSortDir = 'desc';
+        let lastRefreshTime = Date.now();
+        let messageCenterTab = 'game';
+        const MESSAGE_CENTER = {
+            game: [
+                { id: 1, name: "彩票机01 出票口堵塞", time: "2026-05-23 18:12:31", status: "未读" },
+                { id: 2, name: "礼品机02 掉礼品异常", time: "2026-05-23 17:48:09", status: "未读" }
+            ]
+        };
+
+        // 全量真实底层数据集
+        const MOCK_DATA = {
+            cashier: {
+                title: "收银台区块", sub: "3 在线 / 4 台 · 当日实时数据",
+                devices: [
+                    { name: "1号收银台", no: "C001", online: true, reportKey: "sales", data: { "营业额": "¥12,580", "订单数": "186", "售币数": "3,200", "币余额": "1,800" } },
+                    { name: "2号收银台", no: "C002", online: true, reportKey: "sales", data: { "营业额": "¥9,340", "订单数": "142", "售币数": "2,100", "币余额": "900" } },
+                    { name: "3号收银台", no: "C003", online: true, reportKey: "sales", data: { "营业额": "¥7,820", "订单数": "118" } },
+                    { name: "4号收银台", no: "C004", online: false, lastOnline: "2026-05-21 10:08" }
+                ]
+            },
+            self: {
+                title: "自助机区块", sub: "10 在线 / 11 台 · 当日实时数据",
+                devices: [
+                    { name: "售币提币机01", no: "K001", online: true, reportKey: "sales", data: { "营业额": "¥8,200", "售币数": "1,500", "币余额": "800", "卡余额": "320" }, warns: [{t:"缺打印纸", c:"orange"}] },
+                    { name: "售币提币机02", no: "K002", online: true, reportKey: "sales", data: { "营业额": "¥6,100", "售币数": "1,200", "币余额": "600", "卡余额": "180" }, warns: [{t:"通讯异常", c:"red"}] },
+                    { name: "存币机01", no: "K003", online: true, reportKey: "memberDepositCoin", data: { "存币数": "2,340" }, warns: [{t:"存币桶满", c:"orange"}] },
+                    { name: "存票机01", no: "K004", online: true, reportKey: "physicalTicketDeposit", data: { "存票数": "18,600" } },
+                    { name: "存票机02", no: "K005", online: false, lastOnline: "2026-05-20 18:35" },
+                    { name: "售珠提珠机01", no: "K006", online: true, reportKey: "sales", data: { "营业额": "¥3,200", "售珠数": "480", "存珠数": "120", "珠余额": "360" }, warns: [{t:"缺打印纸", c:"orange"}, {t:"存珠桶满", c:"orange"}] },
+                    { name: "手持机01", no: "K007", online: true, reportKey: "sales", data: { "营业额": "¥2,100" } },
+                    { name: "取卡机01", no: "K008", online: true, data: { "出卡数": "580", "卡余额": "420" } },
+                    { name: "抽奖机01", no: "K009", online: true, reportKey: "lotteryMachineRecord", data: { "抽奖次数": "1,240", "出奖次数": "186" } },
+                    { name: "娃娃回收机01", no: "K010", online: true, reportKey: "giftRecycleRecord", data: { "收娃娃数": "68" } },
+                    { name: "快投王01", no: "K011", online: true, reportKey: "quickThrowRecord", data: { "投实物币": "3,200", "投电子币": "1,800", "投币总数": "5,000" }, special: "投币总数" }
+                ]
+            },
+            game: {
+                summary: { coin: "21,480", ticket: "21,700", point: "4,620", gift: "78", alarm: 2 },
+                types: [
+                    {
+                        name: "模拟机", tag: "tag-mn", devices: [
+                            { name: "赛车模拟器", no: "G001", online: true, type: "mn", pCount: 1, coin: 1240, activeField: "default", dataset: { default: { "投币数": "1,240" } }, station: "基站A", model: "极速赛车" },
+                            { name: "飞行模拟器", no: "G002", online: true, type: "mn", pCount: 1, coin: 980, activeField: "default", dataset: { default: { "投币数": "980" } }, station: "基站A", model: "飞行模拟" },
+                            { name: "篮球机01", no: "G003", online: true, type: "mn", pCount: 2, coin: 760, activeField: "default", dataset: { default: { "投币数": "760" } }, station: "基站B", model: "篮球机" }
+                        ]
+                    },
+                    {
+                        name: "彩票机", tag: "tag-cp", devices: [
+                            { name: "彩票机01", no: "G004", online: true, type: "cp", pCount: 2, coin: 1920, ticket: 840, point: 0, alarm: true, activeField: "ticket", dataset: { ticket: { "净投币数": "1,920", "出票数": "8,400", "每币奖票数": "4.38" }, point: { "投币数": "2,100", "出点数": "180", "出蓝票数": "320", "差额": "1,600", "盈币率": "76.2%" } }, station: "基站B", model: "彩票机A" },
+                            { name: "彩票机02", no: "G005", online: true, type: "cp", pCount: 2, coin: 1710, ticket: 720, point: 0, activeField: "ticket", dataset: { ticket: { "净投币数": "1,710", "出票数": "7,200", "每币奖票数": "4.21" }, point: { "投币数": "1,860", "出点数": "150", "出蓝票数": "280", "差额": "1,430", "盈币率": "76.9%" } }, station: "基站C", model: "彩票机A" },
+                            { name: "彩票机03", no: "G006", online: true, type: "cp", pCount: 2, coin: 1420, ticket: 610, point: 0, activeField: "ticket", dataset: { ticket: { "净投币数": "1,420", "出票数": "6,100", "每币奖票数": "4.30" }, point: { "投币数": "1,540", "出点数": "120", "出蓝票数": "210", "差额": "1,210", "盈币率": "78.6%" } }, station: "基站C", model: "彩票机B" }
+                        ]
+                    },
+                    {
+                        name: "中性机", tag: "tag-zx", devices: [
+                            { name: "中性机01", no: "G007", online: true, type: "zx", pCount: 1, coin: 1800, point: 1480, activeField: "default", dataset: { default: { "投币数": "1,800", "出点数": "320", "差额": "1,480", "盈币率": "82.2%" } }, station: "基站A", model: "中性机A" },
+                            { name: "中性机02", no: "G008", online: true, type: "zx", pCount: 1, coin: 1200, point: 990, activeField: "default", dataset: { default: { "投币数": "1,200", "出点数": "210", "差额": "990", "盈币率": "82.5%" } }, station: "基站B", model: "中性机A" }
+                        ]
+                    },
+                    {
+                        name: "礼品机", tag: "tag-lp", devices: [
+                            { name: "礼品机01", no: "G009", online: true, type: "lp", pCount: 1, coin: 3200, gift: 42, activeField: "qty", dataset: { qty: { "投币数": "3,200", "出礼品数": "42", "出礼品币数": "76.2", "出礼品局数": "9.5" }, rate: { "投币价值": "¥1,600", "出礼品价值": "¥357", "返还率": "22.3%" } }, station: "基站C", model: "礼品机A" },
+                            { name: "礼品机02", no: "G010", online: true, type: "lp", pCount: 1, coin: 2800, gift: 36, alarm: true, activeField: "qty", dataset: { qty: { "投币数": "2,800", "出礼品数": "36", "出礼品币数": "77.8", "出礼品局数": "9.7" }, rate: { "投币价值": "¥1,400", "出礼品价值": "¥306", "返还率": "21.9%" } }, station: "基站A", model: "礼品机A" },
+                            { name: "礼品机03", no: "G011", online: true, type: "lp", pCount: 1, coin: 0, gift: 0, activeField: "qty", dataset: { qty: { "投币数": "0", "出礼品数": "0", "出礼品币数": "--", "出礼品局数": "--" }, rate: { "投币价值": "¥0", "出礼品价值": "¥0", "返还率": "--" } }, station: "基站B", model: "礼品机B" }
+                        ]
+                    }
+                ]
+            },
+            project: {
+                title: "游乐大项目", sub: "3 在线 / 4 台",
+                devices: [
+                    { name: "蹦床乐园", no: "P001", online: true, reportKey: "entryExit", data: { "在场人数": "23人", "入场人数": "186", "用门票数": "186", "投币数": "0", "加时金额": "¥0" } },
+                    { name: "攀岩区", no: "P002", online: true, reportKey: "entryExit", data: { "在场人数": "8人", "入场人数": "64", "用门票数": "64", "投币数": "320", "加时金额": "¥120" } },
+                    { name: "VR体验馆", no: "P003", online: true, reportKey: "entryExit", data: { "在场人数": "5人", "入场人数": "42", "用门票数": "42", "投币数": "180", "加时金额": "¥0" } },
+                    { name: "儿童乐园", no: "P004", online: false, lastOnline: "2026-05-21 09:42" }
+                ]
+            }
+        };
+
+        const GAME_TYPE_META = {
+            mn: { label: "模拟机", className: "card-mn", fields: ["投币数"] },
+            cp: { label: "彩票机", className: "card-cp", fields: ["净投币数", "出票数", "每币奖票数", "投币数", "出点数", "出蓝票数", "差额", "盈币率"] },
+            zx: { label: "中性机", className: "card-zx", fields: ["投币数", "出点数", "差额", "盈币率"] },
+            lp: { label: "礼品机", className: "card-lp", fields: ["投币数", "出礼品数", "出礼品币数", "出礼品局数", "投币价值", "出礼品价值", "返还率"] }
+        };
+
+        const GAME_REPORT_METRICS = new Set(["投币数", "净投币数", "出点数", "出票数", "出蓝票数", "每币奖票数", "盈币率", "出礼品数", "出礼品币数", "出礼品局数", "投币价值", "出礼品价值", "返还率"]);
+
+        const REPORT_DEFINITIONS = {
+            sales: {
+                title: "销售查询",
+                tabs: ["明细", "按天汇总", "按月汇总", "按套餐汇总", "按经营标签汇总", "按会员汇总"],
+                hidden: ["开始时间", "结束时间", "开始营业日期", "结束营业日期", "营业班次", "操作终端", "合作商"],
+                filters: ["开始时间", "结束时间", "套餐", "销售渠道", "支付方式", "会员", "会员级别", "开始营业日期", "结束营业日期", "单号", "营业班次", "操作终端", "操作员", "备注", "合作商"],
+                columns: ["时间", "订单号", "名称", "编号", "销售数量", "总金额", "优惠金额", "实收金额", "支付方式", "项目类型", "销售渠道", "会员姓名", "会员账号"],
+                rows: [
+                    ["2026-05-23 18:01:38", "60059260523001", "10元1币（线下代币）", "37106870", "1", "10.00", "0.00", "10.00", "拉卡拉支付", "销售区域", "门店", "CZF22", "1ACBZGPI5L"],
+                    ["2026-05-23 17:43:12", "60059260523002", "百事可乐无糖", "77E98652", "1", "4.00", "0.00", "4.00", "电子优惠券", "零售商品", "门店", "散客", ""],
+                    ["2026-05-23 16:20:45", "60059260523003", "淘气堡次票55元", "35L00180", "1", "55.00", "0.00", "55.00", "现金", "门票套餐", "门店", "CZF22", "1ACBZGPI5L"]
+                ]
+            },
+            memberDepositCoin: {
+                title: "会员存币查询",
+                tabs: ["明细", "按天汇总", "按月汇总"],
+                hidden: ["开始时间", "结束时间", "开始营业日期", "结束营业日期", "营业班次", "设备", "合作商"],
+                filters: ["开始时间", "结束时间", "开始营业日期", "结束营业日期", "会员", "设备", "班次", "操作类型", "合作商"],
+                columns: ["时间", "会员号码", "会员账号", "会员姓名", "设备", "存币数", "操作类型", "操作员", "营业日期", "班次", "备注"],
+                rows: [["2026-05-23 14:18:22", "8504000187", "1ACBZGPI5L", "CZF22", "存币机01", "300", "会员存币", "admin", "2026-05-23", "早班", "看板设备下钻"]]
+            },
+            physicalTicketDeposit: {
+                title: "存实物票查询",
+                tabs: ["明细", "按天汇总", "按月汇总", "按设备汇总", "按会员汇总"],
+                hidden: ["开始时间", "结束时间", "设备", "合作商"],
+                filters: ["开始时间", "结束时间", "设备", "会员", "存票条码", "奖票类型", "条码状态", "合作商"],
+                columns: ["时间", "设备", "存票数量", "会员号码", "会员账号", "奖票类型", "会员姓名", "操作员", "存票条码", "备注", "条码状态"],
+                rows: [["2026-05-23 15:06:17", "存票机01", "1,200", "8504000187", "1ACBZGPI5L", "实物票", "CZF22", "admin", "TP202605230001", "看板设备下钻", "正常"]]
+            },
+            lotteryMachineRecord: {
+                title: "抽奖机记录",
+                tabs: ["明细", "活动分析", "奖品汇总"],
+                hidden: ["开始时间", "结束时间", "合作商"],
+                filters: ["开始时间", "结束时间", "活动", "抽奖结果", "奖项", "会员", "奖品", "合作商"],
+                columns: ["时间", "活动名称", "会员号码", "会员账号", "会员姓名", "活动编号", "抽奖扣除", "扣除数量", "抽奖结果", "奖球编号", "奖球芯片号", "奖项", "奖品", "备注", "抽奖机"],
+                rows: [["2026-05-23 16:12:31", "六一抽奖", "8504000187", "1ACBZGPI5L", "CZF22", "A202605", "积分", "10", "中奖", "B008", "RFID2026052308", "二等奖", "毛绒玩具", "", "抽奖机01"]]
+            },
+            giftRecycleRecord: {
+                title: "礼品回收记录",
+                tabs: ["奖票回收", "积分回收", "代币回收", "特殊奖票回收", "礼品卡回收"],
+                hidden: ["起始回收时间", "结束回收时间", "起始营业日期", "结束营业日期", "操作终端", "合作商"],
+                filters: ["起始回收时间", "结束回收时间", "起始营业日期", "结束营业日期", "会员", "会员级别", "订单号", "商品名称", "商品编号", "操作终端", "操作员", "合作商"],
+                columns: ["回收时间", "订单号", "会员姓名", "会员账号", "会员号码", "商品名称", "商品编号", "回收单价", "回收数量", "价格小计", "营业日期", "操作终端", "操作员", "会员级别"],
+                rows: [["2026-05-23 17:08:09", "RC20260523001", "CZF22", "1ACBZGPI5L", "8504000187", "小熊公仔", "GIFT001", "12.00", "1", "12.00", "2026-05-23", "娃娃回收机01", "admin", "普通会员"]]
+            },
+            quickThrowRecord: {
+                title: "快投王记录",
+                tabs: ["明细"],
+                hidden: ["时间", "设备", "合作商"],
+                filters: ["时间", "会员", "设备", "自定义机位号", "状态", "机位编号", "合作商"],
+                columns: ["时间", "自定义机位号", "机位编号", "游戏机名称", "投币总数", "已投币数", "未投币数", "投币类型", "会员", "设备编号", "设备名称", "状态", "处理人", "处理时间"],
+                rows: [["2026-05-23 11:26:01", "7", "MC004A", "深海狂鲨", "300", "300", "0", "实物投币", "一号快投王1", "132233D322", "快投王01", "正常", "", ""]]
+            },
+            gameRevenue: {
+                title: "游戏机盈收分析",
+                tabs: ["明细", "按天汇总", "按月汇总", "按机位汇总", "按游戏机汇总", "按游戏机分类汇总"],
+                hidden: ["全部查询条件"],
+                filters: ["开始营业日期", "结束营业日期", "游戏机机位", "游戏机", "游戏机分类", "营收分类", "合作商"],
+                columns: ["营业日期", "游戏机机位", "游戏机编号", "游戏机名称", "游戏机分类", "营收分类", "启动次数", "投币总数", "总点数", "出特殊奖票总数", "差额", "盈币率(%)", "出票票总数", "每币奖票数", "出礼品总数"],
+                rows: [["2026-05-23", "A01", "G004", "彩票机01", "彩票机", "彩票", "86", "2,100", "180", "320", "1,600", "76.2", "8,400", "4.38", "0"]]
+            },
+            gameRevenueByMachine: {
+                title: "游戏机盈收分析",
+                tabs: ["明细", "按天汇总", "按月汇总", "按机位汇总", "按游戏机汇总", "按游戏机分类汇总"],
+                activeTab: "按游戏机汇总",
+                hidden: ["开始营业日期", "结束营业日期", "合作商"],
+                filters: ["开始营业日期", "结束营业日期", "游戏机", "游戏机分类", "营收分类", "合作商", "显示无记录机台"],
+                stickyColumns: ["游戏机编号", "游戏机名称"],
+                columns: ["游戏机编号", "游戏机名称", "游戏机分类", "营收分类", "启动次数", "投币总数", "总点数", "出特殊奖票总数", "差额", "盈币率(%)", "出票票总数", "每币奖票数", "出礼品总数", "出礼品币数", "出礼品局数", "出弹珠卡片", "投币价值", "出票票价值", "出礼品价值"],
+                rows: [
+                    ["G004", "彩票机01", "彩票机", "彩票", "86", "2,100", "180", "320", "1,600", "76.2", "8,400", "4.38", "0", "--", "--", "0", "¥1,050", "¥420", "¥0"],
+                    ["G009", "礼品机01", "礼品机", "礼品", "64", "3,200", "0", "0", "3,200", "100.0", "0", "--", "42", "76.2", "9.5", "0", "¥1,600", "¥0", "¥357"]
+                ]
+            },
+            entryExit: {
+                title: "出入场查询",
+                tabs: ["明细", "按天汇总", "按月汇总", "按门票汇总", "按会员汇总"],
+                hidden: ["开始入场时间", "结束入场时间", "开始离场时间", "结束离场时间", "项目", "开始营业日期", "结束营业日期", "班次", "合作商"],
+                filters: ["开始入场时间", "结束入场时间", "开始离场时间", "结束离场时间", "项目", "会员账号", "入场门票", "门票码", "在场状态", "开始营业日期", "结束营业日期", "班次", "合作商"],
+                columns: ["会员号码", "会员账号", "会员姓名", "项目名称", "项目编号", "入场时间", "出场时间", "在场状态", "返场", "入场费(币)", "入场门票(张)", "门票码", "已游玩时间(分钟)", "限玩时间(分钟)", "加时(分钟)"],
+                rows: [["8504000187", "1ACBZGPI5L", "CZF22", "蹦床乐园", "P001", "2026-05-23 10:12:00", "", "在场", "否", "0", "1", "T20260523001", "138", "180", "0"]]
+            }
+        };
+
+        const MODAL_TEMPLATES = {
+            pPosition: {
+                mn: `<table class="proto-table"><thead><tr><th>P位</th><th>投币数</th></tr></thead><tbody><tr><td>1P</td><td>1,240</td></tr></tbody></table>`,
+                cp: `<table class="proto-table"><thead><tr><th>P位</th><th>净投币</th><th>出票数</th><th>每币奖票</th><th>投币数</th><th>出点数</th><th>出蓝票数</th><th>差额</th><th>盈币率</th></tr></thead><tbody><tr><td>1P</td><td>1,020</td><td>4,500</td><td>4.41</td><td>1,100</td><td>80</td><td>170</td><td>850</td><td>77.3%</td></tr><tr><td>2P</td><td>900</td><td>3,900</td><td>4.33</td><td>1,000</td><td>100</td><td>150</td><td>750</td><td>75.0%</td></tr></tbody></table>`,
+                zx: `<table class="proto-table"><thead><tr><th>P位</th><th>投币数</th><th>出点数</th><th>差额</th><th>盈币率</th></tr></thead><tbody><tr><td>1P</td><td>900</td><td>160</td><td>740</td><td>82.2%</td></tr></tbody></table>`,
+                lp: `<table class="proto-table"><thead><tr><th>P位</th><th>投币数</th><th>出礼品数</th><th>出礼品币数</th><th>投币价值</th><th>出礼品价值</th><th>返还率</th></tr></thead><tbody><tr><td>1P</td><td>1,600</td><td>21</td><td>76.2</td><td>¥800</td><td>¥178</td><td>22.3%</td></tr></tbody></table>`
+            },
+            metricDoc: `
+                <div class="metric-doc">
+                    <div class="metric-doc-section"><div class="metric-doc-title">收银台</div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">营业额</span><span class="metric-doc-desc">当天的营业额，不含退单</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">订单数</span><span class="metric-doc-desc">当天的订单总数，不含退单</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">售币数</span><span class="metric-doc-desc">包含代币、实物币、赠币</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">币余额</span><span class="metric-doc-desc">剩余实物币数量</span></div>
+                    </div>
+                    <div class="metric-doc-section"><div class="metric-doc-title">自助机</div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">营业额</span><span class="metric-doc-desc">当天的营业额，不含退单</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">订单数</span><span class="metric-doc-desc">当天的订单总数，不含退单</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">售币数</span><span class="metric-doc-desc">包含代币、实物币、赠币</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">币余额</span><span class="metric-doc-desc">剩余实币数量</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">存币数</span><span class="metric-doc-desc">存实物币数量</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">存票数</span><span class="metric-doc-desc">存实物票数量</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">售珠数</span><span class="metric-doc-desc">包含实物弹珠和存入会员账号的弹珠</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">存珠数</span><span class="metric-doc-desc">存实物弹珠数量</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">珠余额</span><span class="metric-doc-desc">剩余实物弹珠数量</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">出卡数</span><span class="metric-doc-desc">出会员卡数量</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">卡余额</span><span class="metric-doc-desc">剩余实物卡数量</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">抽奖次数</span><span class="metric-doc-desc">抽奖总次数，包含抽奖成功、失效次数</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">出奖次数</span><span class="metric-doc-desc">出奖总次数，已剔除不中奖次数</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">投币总数</span><span class="metric-doc-desc">等于投实物币+投电子币</span></div>
+                    </div>
+                    <div class="metric-doc-section"><div class="metric-doc-title">游戏机</div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">投币数</span><span class="metric-doc-desc">包含代币、实物币、赠币、游戏时间投币数、游戏机局数投币数</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">出点数</span><span class="metric-doc-desc">包含实物和电子</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">净投币数</span><span class="metric-doc-desc">等于投币数-出点数</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">出票数</span><span class="metric-doc-desc">出彩票数量，包含实物和电子</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">出蓝票数</span><span class="metric-doc-desc">出特殊奖票数，包含实物和电子</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">每币奖票数</span><span class="metric-doc-desc">等于出奖数/净投币数(投币数-出点数)</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">差额</span><span class="metric-doc-desc">等于投币数-出点数-出特殊奖票数</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">盈币率</span><span class="metric-doc-desc">等于差额/投币总数*100%</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">出礼品数</span><span class="metric-doc-desc">等于礼品机掉落数量+礼品机盘存出库数，盘存前一天数据，需隔天才会更新数据；当天盘存则实时运算</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">出礼品币数</span><span class="metric-doc-desc">等于投币数/出礼品数</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">出礼品局数</span><span class="metric-doc-desc">等于出礼品币数/每局投币数</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">投币价值</span><span class="metric-doc-desc">等于投币数*币单价</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">出礼品价值</span><span class="metric-doc-desc">出礼品数*礼品成本单价；礼品成本核算后同步更新本期礼品成本单价及出礼品价值</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">返还率</span><span class="metric-doc-desc">等于出礼品价值/投币价值</span></div>
+                    </div>
+                    <div class="metric-doc-section"><div class="metric-doc-title">大项目</div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">在场人数</span><span class="metric-doc-desc">当前未离场的人数</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">入场人数</span><span class="metric-doc-desc">等于投币+扣次票+通行证当天首次入场人数</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">用门票数</span><span class="metric-doc-desc">等于扣次票+通行证</span></div>
+                        <div class="metric-doc-line"><span class="metric-doc-name">加时金额</span><span class="metric-doc-desc">会员/散客购买的加时套餐金额</span></div>
+                    </div>
+                </div>
+            `,
+            alarms: `
+                <div class="alarm-detail-item"><div class="alarm-dot red"></div><div class="alarm-txt">投币器卡币（硬币通道一阻塞）</div><div class="alarm-time">2026-05-19 14:32</div></div>
+                <div class="alarm-detail-item"><div class="alarm-dot orange"></div><div class="alarm-txt">出票口余纸不足报警</div><div class="alarm-time">2026-05-19 10:15</div></div>
+            `
+        };
+
+        function showToast(msg) {
+            const t = document.getElementById('toastMessage');
+            t.innerText = msg; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 1800);
+        }
+
+        function updateRefreshTime() {
+            const now = new Date();
+            document.getElementById('refreshTimeText').innerText = `上次刷新时间：今日 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+        }
+
+        function triggerRefresh() {
+            const now = Date.now();
+            if (now - lastRefreshTime < 60000) { showToast("距上次刷新不足1分钟，本次不更新数据"); return; }
+            lastRefreshTime = now; updateRefreshTime(); showToast("数据已刷新"); renderDashboard();
+        }
+
+        function switchMainTab(tabKey, element) {
+            currentTab = tabKey;
+            document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            document.getElementById('topTimeFilter').style.display = (tabKey === 'game' || tabKey === 'project') ? 'flex' : 'none';
+            renderDashboard();
+        }
+
+        function switchTime(btn) {
+            btn.parentElement.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active'); showToast(`统计时间已切换：${btn.innerText}`); renderDashboard();
+        }
+
+        function toggleMicroTab(e, devNo, subField) {
+            e.stopPropagation();
+            MOCK_DATA.game.types.forEach(t => {
+                let found = t.devices.find(d => d.no === devNo);
+                if (!found) {
+                    t.devices.filter(d => d.model === devNo).forEach(d => { d.activeField = subField; });
+                }
+                if(found) found.activeField = subField;
+            });
+            renderDashboard();
+        }
+
+        function switchGameSubView(view) { currentGameSubView = view; renderDashboard(); }
+        function switchGameSort(sortKey) {
+            if (currentGameSortKey === sortKey) {
+                currentGameSortDir = currentGameSortDir === 'desc' ? 'asc' : 'desc';
+            } else {
+                currentGameSortKey = sortKey;
+                currentGameSortDir = 'desc';
+            }
+            renderDashboard();
+        }
+        function getCurrentBoardTimeLabel() {
+            const activeBtn = document.querySelector('#topTimeFilter button.active');
+            if (currentTab === 'game' || currentTab === 'project') return activeBtn ? activeBtn.innerText : '今日';
+            return '今日';
+        }
+
+        function routeToReport(reportKey, deviceNo, deviceName, metricName) {
+            openModal('report', {
+                reportKey,
+                deviceNo: deviceNo || '全部设备',
+                deviceName: deviceName || '全部设备',
+                metricName: metricName || ''
+            });
+        }
+
+        function getFilterDefaultValue(filter, context) {
+            if (filter.includes("日期") || filter.includes("时间")) return getCurrentBoardTimeLabel();
+            if (["设备", "游戏机", "项目", "操作终端"].includes(filter)) return context.deviceName || "";
+            if (filter === "游戏机机位") return context.deviceNo || "";
+            if (filter === "显示无记录机台") return "否";
+            return "";
+        }
+
+        function buildReportFilters(def, context) {
+            const hiddenSet = new Set(def.hidden || []);
+            if (hiddenSet.has("全部查询条件")) {
+                return `
+                    <div class="report-actions">
+                        <button class="report-action-btn primary">查询(Q)</button>
+                        <button class="report-action-btn">导出(E)</button>
+                    </div>
+                `;
+            }
+            const visibleFilters = (def.filters || []).filter(item => !hiddenSet.has(item));
+            const actions = `
+                <div class="report-actions">
+                    <button class="report-action-btn primary">查询(Q)</button>
+                    <button class="report-action-btn">导出(E)</button>
+                </div>
+            `;
+            if (!visibleFilters.length) return actions;
+            return `
+                <div class="report-filter-panel">
+                    ${visibleFilters.map(filter => `
+                        <label class="filter-field">
+                            <span>${filter}</span>
+                            <input class="filter-control" value="${getFilterDefaultValue(filter, context)}" readonly>
+                        </label>
+                    `).join("")}
+                </div>
+                ${actions}
+            `;
+        }
+
+        function buildReportTable(def) {
+            const sticky = def.stickyColumns || [];
+            const stickyIndexMap = new Map(sticky.map((column, index) => [column, index + 1]));
+            const cellClass = column => {
+                if (!stickyIndexMap.has(column)) return "";
+                return ` class="sticky-col ${stickyIndexMap.get(column) === 2 ? 'sticky-col-2' : ''}"`;
+            };
+            if (!def.rows.length) return `<div class="report-empty">当前筛选条件下暂无数据</div>`;
+            return `
+                <div class="report-table-wrap">
+                    <table class="proto-table report-table">
+                        <thead><tr>${def.columns.map(c => `<th${cellClass(c)}>${c}</th>`).join("")}</tr></thead>
+                        <tbody>${def.rows.map(row => `<tr>${def.columns.map((c, index) => `<td${cellClass(c)}>${row[index] ?? ""}</td>`).join("")}</tr>`).join("")}</tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function buildReportContent(context) {
+            const def = REPORT_DEFINITIONS[context.reportKey];
+            if (!def) return `<div class="report-empty">未配置报表模板</div>`;
+            const tabs = def.tabs.map((tab, index) => `<span class="report-tab ${(def.activeTab ? tab === def.activeTab : index === 0) ? 'active' : ''}">${tab}</span>`).join("");
+            const metricChip = context.metricName ? `<span class="context-chip">点击指标：${context.metricName}</span>` : "";
+            return `
+                <div class="report-context">
+                    <span class="context-chip">看板时间：${getCurrentBoardTimeLabel()}</span>
+                    <span class="context-chip">当前设备：${context.deviceName}（${context.deviceNo}）</span>
+                    ${metricChip}
+                </div>
+                ${buildReportFilters(def, context)}
+                <div class="report-tabs">${tabs}</div>
+                ${buildReportTable(def)}
+            `;
+        }
+
+        function getUnreadMessageCount() {
+            return MESSAGE_CENTER.game.length;
+        }
+
+        function switchMessageTab(tabKey) {
+            messageCenterTab = tabKey;
+            const body = document.getElementById('modalDynamicContent');
+            if (body) body.innerHTML = buildMessageCenterContent();
+            renderDashboard();
+        }
+
+        function markMessageRead(id) {
+            ["game"].forEach(key => {
+                const index = MESSAGE_CENTER[key].findIndex(item => item.id === id);
+                if (index >= 0) MESSAGE_CENTER[key].splice(index, 1);
+            });
+            const body = document.getElementById('modalDynamicContent');
+            if (body) body.innerHTML = buildMessageCenterContent();
+            renderDashboard();
+        }
+
+        function markAllCurrentMessagesRead() {
+            MESSAGE_CENTER.game.splice(0, MESSAGE_CENTER.game.length);
+            messageCenterTab = 'game';
+            const body = document.getElementById('modalDynamicContent');
+            if (body) body.innerHTML = buildMessageCenterContent();
+            renderDashboard();
+        }
+
+        function buildMessageRows(rows) {
+            if (!rows.length) {
+                return `<div class="message-empty"><div class="message-empty-icon">i</div><div>暂无数据</div></div>`;
+            }
+            return `
+                <table class="message-table">
+                    <thead><tr><th style="width:60px;">序号</th><th>名称</th><th style="width:210px;">时间</th><th style="width:120px;">状态</th><th style="width:110px;">操作</th></tr></thead>
+                    <tbody>${rows.map((row, index) => `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${row.name}</td>
+                            <td>${row.time}</td>
+                            <td>${row.status}</td>
+                            <td><button class="read-btn" onclick="markMessageRead(${row.id})">标记已读</button></td>
+                        </tr>
+                    `).join("")}</tbody>
+                </table>
+            `;
+        }
+
+        function buildMessageCenterContent() {
+            messageCenterTab = 'game';
+            const rows = MESSAGE_CENTER.game;
+            return `
+                <div class="message-center">
+                    <div class="message-tabs">
+                        <button class="message-tab active" onclick="switchMessageTab('game')">游戏机</button>
+                    </div>
+                    <div class="message-actions"><button class="message-link" onclick="markAllCurrentMessagesRead()">全部标记已读</button></div>
+                    ${buildMessageRows(rows)}
+                </div>
+            `;
+        }
+
+        function getDeviceIconClass(type) {
+            if (type === "cashier") return "icon-cashier";
+            if (type === "self") return "icon-self";
+            if (type === "project") return "icon-project";
+            return "icon-game";
+        }
+
+        function openModal(mode, name, typeKey) {
+            const mask = document.getElementById('protoModalMask');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalDynamicContent');
+            const wrapper = document.getElementById('modalWrapper');
+
+            if (mode === 'pPosition') {
+                wrapper.style.width = '580px'; title.innerText = name;
+                body.innerHTML = MODAL_TEMPLATES.pPosition[typeKey] || MODAL_TEMPLATES.pPosition['mn'];
+            } else if (mode === 'modelDetail') {
+                const modelGroup = getModelGroups().find(m => m.name === name);
+                wrapper.style.width = '860px'; title.innerText = name;
+                body.innerHTML = buildModelDetailTable(modelGroup);
+            } else if (mode === 'alarms') {
+                wrapper.style.width = '460px'; title.innerText = `${name} · 阻断异常快速诊断`;
+                body.innerHTML = MODAL_TEMPLATES.alarms;
+            } else if (mode === 'metricDoc') {
+                wrapper.style.width = '960px'; title.innerText = '看板取数说明';
+                body.innerHTML = MODAL_TEMPLATES.metricDoc;
+            } else if (mode === 'report') {
+                const context = name;
+                const def = REPORT_DEFINITIONS[context.reportKey];
+                wrapper.style.width = '1180px'; title.innerText = def ? def.title : '报表';
+                body.innerHTML = buildReportContent(context);
+            } else if (mode === 'messageCenter') {
+                wrapper.style.width = '980px'; title.innerText = '消息中心';
+                body.innerHTML = buildMessageCenterContent();
+            }
+            mask.classList.add('show');
+        }
+        function closeModal() { document.getElementById('protoModalMask').classList.remove('show'); }
+
+        // 骨架装配引擎
+        function createSectionBlock(type) {
+            const blockData = MOCK_DATA[type];
+            const section = document.createElement('div');
+            section.className = 'block-section';
+            section.innerHTML = `<div class="block-title"><div class="title-left"><span>${blockData.title}</span><span class="sub-txt">${blockData.sub}</span></div></div>`;
+            
+            const grid = document.createElement('div');
+            grid.className = `card-grid`;
+            const isProjectTimeActive = (type === 'project' && document.querySelector('#topTimeFilter button.active').innerText !== '今日');
+
+            blockData.devices.filter(dev => dev.valid !== false).forEach(dev => {
+                const card = document.createElement('div');
+                card.className = `device-card card-${type} ${!dev.online ? 'offline' : ''}`;
+
+                const nameClass = dev.online && dev.reportKey ? 'device-name action-link' : 'device-name';
+                const nameAction = dev.online && dev.reportKey ? ` onclick="routeToReport('${dev.reportKey}','${dev.no}','${dev.name}')"` : '';
+                let headerHtml = `<div class="card-header"><div class="card-title-group"><span class="device-icon ${getDeviceIconClass(type)}"></span><div class="${nameClass}"${nameAction}>${dev.name}</div></div><div class="status-badge ${dev.online ? 'online' : 'offline'}">${dev.online ? '在线' : '离线'}</div></div><div class="device-no">${dev.no}</div>`;
+                let bodyHtml = '';
+                if (!dev.online) { bodyHtml = `<div class="offline-placeholder">最后在线：${dev.lastOnline || '--'}</div>`; } 
+                else {
+                    bodyHtml = `<div class="card-data-zone">`;
+                    for (let [lbl, val] of Object.entries(dev.data || {})) {
+                        if (isProjectTimeActive && lbl === '在场人数') val = '--';
+                        const clickable = !!dev.reportKey && val !== '--';
+                        let valClass = clickable ? 'data-val clickable' : (dev.special === lbl) ? 'data-val blue-highlight' : 'data-val';
+                        const action = clickable ? ` onclick="routeToReport('${dev.reportKey}','${dev.no}','${dev.name}','${lbl}')"` : '';
+                        bodyHtml += `<div class="data-item"><span class="data-label">${lbl}</span><span class="${valClass}"${action}>${val}</span></div>`;
+                    }
+                    bodyHtml += `</div>`;
+                }
+
+                let warnHtml = '';
+                if (dev.warns && dev.warns.length > 0) {
+                    warnHtml = `<div class="warning-zone">`;
+                    dev.warns.forEach(w => { warnHtml += `<span class="warn-tag-capsule ${w.c}">⚠ ${w.t}</span>`; });
+                    warnHtml += `</div>`;
+                }
+                card.innerHTML = headerHtml + bodyHtml + warnHtml;
+                grid.appendChild(card);
+            });
+            section.appendChild(grid);
+            return section;
+        }
+
+        function getSortedFlatGames() {
+            let list = [];
+            MOCK_DATA.game.types.forEach(t => { t.devices.forEach(d => { list.push(d); }); });
+            list.sort((a, b) => {
+                let valA = 0, valB = 0;
+                if (currentGameSortKey === 'coin') { valA = a.coin || 0; valB = b.coin || 0; }
+                else if (currentGameSortKey === 'ticket') { valA = a.ticket || 0; valB = b.ticket || 0; }
+                else if (currentGameSortKey === 'gift') { valA = a.gift || 0; valB = b.gift || 0; }
+                else if (currentGameSortKey === 'point') { valA = a.point || 0; valB = b.point || 0; }
+                if (valA !== valB) return currentGameSortDir === 'desc' ? valB - valA : valA - valB;
+                return a.no.localeCompare(b.no);
+            });
+            return list;
+        }
+
+        function parseMetricNumber(val) {
+            if (val === undefined || val === null || val === '--') return 0;
+            return Number(String(val).replace(/[¥,%人,]/g, '')) || 0;
+        }
+
+        function formatNumber(num) {
+            return Math.round(num).toLocaleString('zh-CN');
+        }
+
+        function getDeviceMetric(dev, label) {
+            const pools = Object.values(dev.dataset || {});
+            for (const pool of pools) {
+                if (Object.prototype.hasOwnProperty.call(pool, label)) return pool[label];
+            }
+            if (label === "出礼品数") return dev.gift || 0;
+            if (label === "出票数") return dev.ticket ? dev.ticket * 10 : 0;
+            if (label === "净投币数" || label === "投币数") return dev.coin || 0;
+            if (label === "差额" || label === "出点数") return dev.point || 0;
+            return "--";
+        }
+
+        function getModelGroups() {
+            const groups = {};
+            getSortedFlatGames().forEach(dev => {
+                if (!groups[dev.model]) {
+                    const meta = GAME_TYPE_META[dev.type];
+                    groups[dev.model] = { name: dev.model, type: dev.type, typeLabel: meta.label, className: meta.className, devices: [] };
+                }
+                groups[dev.model].devices.push(dev);
+            });
+            return Object.values(groups).map(group => {
+                const metrics = buildModelMetrics(group);
+                return { ...group, metrics, activeField: group.devices[0]?.activeField || 'default' };
+            });
+        }
+
+        function buildModelMetrics(group) {
+            const sum = label => group.devices.reduce((total, dev) => total + parseMetricNumber(getDeviceMetric(dev, label)), 0);
+            if (group.type === "mn") return [{ label: "投币数", value: formatNumber(sum("投币数")) }];
+            if (group.type === "cp") {
+                const netCoin = sum("净投币数");
+                const tickets = sum("出票数");
+                const coin = sum("投币数");
+                const point = sum("出点数");
+                const blueTicket = sum("出蓝票数");
+                const diff = coin - point - blueTicket;
+                return [
+                    { label: "净投币数", value: formatNumber(netCoin) },
+                    { label: "出票数", value: formatNumber(tickets) },
+                    { label: "每币奖票数", value: netCoin ? (tickets / netCoin).toFixed(2) : "--" },
+                    { label: "投币数", value: formatNumber(coin) },
+                    { label: "出点数", value: formatNumber(point) },
+                    { label: "出蓝票数", value: formatNumber(blueTicket) },
+                    { label: "差额", value: formatNumber(diff) },
+                    { label: "盈币率", value: coin ? `${((diff / coin) * 100).toFixed(1)}%` : "--" }
+                ];
+            }
+            if (group.type === "zx") {
+                const coin = sum("投币数");
+                const outCoin = sum("出点数");
+                const diff = coin - outCoin;
+                return [
+                    { label: "投币数", value: formatNumber(coin) },
+                    { label: "出点数", value: formatNumber(outCoin) },
+                    { label: "差额", value: formatNumber(diff) },
+                    { label: "盈币率", value: coin ? `${((diff / coin) * 100).toFixed(1)}%` : "--" }
+                ];
+            }
+            const coin = sum("投币数");
+            const gifts = sum("出礼品数");
+            const coinValue = sum("投币价值");
+            const giftValue = sum("出礼品价值");
+                return [
+                    { label: "投币数", value: formatNumber(coin) },
+                    { label: "出礼品数", value: formatNumber(gifts) },
+                    { label: "出礼品币数", value: gifts ? (coin / gifts).toFixed(1) : "--" },
+                    { label: "出礼品局数", value: gifts ? ((coin / gifts) / 8).toFixed(1) : "--" },
+                    { label: "投币价值", value: `¥${formatNumber(coinValue)}` },
+                    { label: "出礼品价值", value: `¥${formatNumber(giftValue)}` },
+                    { label: "返还率", value: coinValue ? `${((giftValue / coinValue) * 100).toFixed(1)}%` : "--" }
+            ];
+        }
+
+        function getModelDataset(group) {
+            const metrics = group.metrics.reduce((acc, item) => {
+                acc[item.label] = item.value;
+                return acc;
+            }, {});
+            if (group.type === 'cp') {
+                return {
+                    ticket: {
+                        "净投币数": metrics["净投币数"],
+                        "出票数": metrics["出票数"],
+                        "每币奖票数": metrics["每币奖票数"]
+                    },
+                    point: {
+                        "投币数": metrics["投币数"],
+                        "出点数": metrics["出点数"],
+                        "出蓝票数": metrics["出蓝票数"],
+                        "差额": metrics["差额"],
+                        "盈币率": metrics["盈币率"]
+                    }
+                };
+            }
+            if (group.type === 'lp') {
+                return {
+                    qty: {
+                        "投币数": metrics["投币数"],
+                        "出礼品数": metrics["出礼品数"],
+                        "出礼品币数": metrics["出礼品币数"],
+                        "出礼品局数": metrics["出礼品局数"]
+                    },
+                    rate: {
+                        "投币价值": metrics["投币价值"],
+                        "出礼品价值": metrics["出礼品价值"],
+                        "返还率": metrics["返还率"]
+                    }
+                };
+            }
+            return { default: metrics };
+        }
+
+        function buildModelCardDom(group) {
+            const dev = {
+                name: group.name,
+                no: group.name,
+                type: group.type,
+                activeField: group.activeField || (group.type === 'cp' ? 'ticket' : group.type === 'lp' ? 'qty' : 'default'),
+                dataset: getModelDataset(group),
+                alarm: group.devices.some(d => d.alarm)
+            };
+            const card = buildGameCardDom(dev);
+            card.classList.add('model-card');
+            const no = card.querySelector('.device-no');
+            if (no) no.textContent = `${group.devices.length} 台`;
+            const name = card.querySelector('.device-name');
+            if (name) name.setAttribute('onclick', `openModal('modelDetail', '${group.name}', '')`);
+            const header = card.querySelector('.card-header');
+            if (header) {
+                header.insertAdjacentHTML('afterend', `<div class="model-tag-row"><span class="model-type-tag">${group.typeLabel}</span><span class="model-count-tag">${group.devices.length} 台</span></div>`);
+            }
+            return card;
+        }
+
+        function buildPRowsForDevice(dev) {
+            const meta = GAME_TYPE_META[dev.type];
+            const rowCount = ["cp", "lp"].includes(dev.type) ? 2 : 1;
+            return Array.from({ length: rowCount }, (_, index) => {
+                const ratio = rowCount === 1 ? 1 : (index === 0 ? 0.53 : 0.47);
+                const row = { "设备名称": dev.name, "设备编号": dev.no, "P位": `${index + 1}P` };
+                meta.fields.forEach(label => {
+                    const raw = getDeviceMetric(dev, label);
+                    const num = parseMetricNumber(raw);
+                    if (raw === "--") row[label] = "--";
+                    else if (String(raw).includes("¥")) row[label] = `¥${formatNumber(num * ratio)}`;
+                    else if (String(raw).includes("%")) row[label] = raw;
+                    else if (label.includes("率") || label.includes("每币") || label.includes("币数") && dev.type === "lp") row[label] = String(raw);
+                    else row[label] = formatNumber(num * ratio);
+                });
+                return row;
+            });
+        }
+
+        function buildModelDetailTable(group) {
+            const meta = GAME_TYPE_META[group.type];
+            const columns = ["设备名称", "设备编号", "P位", ...meta.fields];
+                const rows = group.devices.flatMap(buildPRowsForDevice);
+                return `<table class="proto-table"><thead><tr>${columns.map(c => `<th>${c}</th>`).join("")}</tr></thead><tbody>${rows.map(row => `<tr>${columns.map(c => `<td>${row[c] ?? "--"}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+        }
+
+        // 构建带微切换功能的游戏机卡片
+        function buildGameCardDom(dev) {
+            const card = document.createElement('div');
+            card.className = `device-card card-${dev.type}`;
+
+            let headerHtml = `<div class="card-header"><div class="card-title-group"><span class="device-icon icon-game"></span><div class="device-name action-link" onclick="openModal('pPosition', '${dev.name}', '${dev.type}')">${dev.name}</div></div>${dev.alarm ? `<div class="alarm-badge-click" onclick="event.stopPropagation(); openModal('alarms', '${dev.name}', '')">异常 2</div>` : ''}</div><div class="device-no">${dev.no}</div>`;
+            if (dev.pCount) {
+                headerHtml = `<div class="card-header"><div class="card-title-group"><span class="device-icon icon-game"></span><div class="device-name action-link" onclick="openModal('pPosition', '${dev.name}', '${dev.type}')">${dev.name}</div></div>${dev.alarm ? `<div class="alarm-badge-click" onclick="event.stopPropagation(); openModal('alarms', '${dev.name}', '')">异常 2</div>` : ''}</div><div class="device-meta-row"><div class="device-no">${dev.no}</div><span class="p-count-tag">P位:${dev.pCount}</span></div>`;
+            }
+            
+            // 数据层：微切组件拦截
+            let switcherHtml = '';
+            if (dev.type === 'cp') {
+                switcherHtml = `
+                    <div class="card-micro-switcher">
+                        <button class="micro-tab ${dev.activeField === 'ticket' ? 'active' : ''}" onclick="toggleMicroTab(event,'${dev.no}','ticket')">出票数据</button>
+                        <button class="micro-tab ${dev.activeField === 'point' ? 'active' : ''}" onclick="toggleMicroTab(event,'${dev.no}','point')">出点数据</button>
+                    </div>
+                `;
+            } else if (dev.type === 'lp') {
+                switcherHtml = `
+                    <div class="card-micro-switcher">
+                        <button class="micro-tab ${dev.activeField === 'qty' ? 'active' : ''}" onclick="toggleMicroTab(event,'${dev.no}','qty')">出礼品数</button>
+                        <button class="micro-tab ${dev.activeField === 'rate' ? 'active' : ''}" onclick="toggleMicroTab(event,'${dev.no}','rate')">返还率</button>
+                    </div>
+                `;
+            }
+
+            let fieldsToRender = dev.dataset[dev.activeField];
+            let bodyHtml = `<div class="card-data-zone">`;
+            for (let [lbl, val] of Object.entries(fieldsToRender)) {
+                let isClickable = GAME_REPORT_METRICS.has(lbl) && val !== '--';
+                let valNode = isClickable 
+                    ? `<span class="data-val clickable" onclick="event.stopPropagation(); routeToReport('gameRevenue','${dev.no}','${dev.name}','${lbl}')">${val}</span>`
+                    : `<span class="data-val">${val}</span>`;
+                bodyHtml += `<div class="data-item"><span class="data-label">${lbl}</span>${valNode}</div>`;
+            }
+            bodyHtml += `</div>`;
+            
+            card.innerHTML = headerHtml + switcherHtml + bodyHtml;
+            return card;
+        }
+
+        function formatOfflineDuration(timeText) {
+            const offlineDate = new Date(String(timeText).replace(/-/g, '/'));
+            const now = new Date('2026/05/23 23:59:59');
+            const diffDays = Math.max(1, Math.floor((now - offlineDate) / 86400000));
+            if (diffDays < 30) return `${diffDays}天`;
+            if (diffDays < 365) return `${Math.floor(diffDays / 30)}个月`;
+            return `${Math.floor(diffDays / 365)}年`;
+        }
+
+        function createGameSectionBlock() {
+            const section = document.createElement('div');
+            section.className = 'block-section';
+
+            if (currentTab === 'all') {
+                const total = getSortedFlatGames().length;
+                const title = document.createElement('div');
+                title.className = 'block-title';
+                title.innerHTML = `<div class="title-left"><span>游戏机区块</span><span class="sub-txt">${total} 在线 / ${total} 台 · 按类型展示</span></div>`;
+                section.appendChild(title);
+            } else {
+                const sumData = MOCK_DATA.game.summary;
+                const summaryBoard = document.createElement('div');
+                summaryBoard.className = 'game-summary-board';
+                summaryBoard.innerHTML = `
+                    <div class="summary-item"><div class="summary-label">投币总数</div><div class="summary-val action-link" onclick="routeToReport('gameRevenueByMachine','ALL','全部游戏机','投币总数')">${sumData.coin}</div></div>
+                    <div class="summary-item"><div class="summary-label">出票总数</div><div class="summary-val action-link" onclick="routeToReport('gameRevenueByMachine','ALL','全部游戏机','出票总数')">${sumData.ticket}</div></div>
+                    <div class="summary-item"><div class="summary-label">出点总数</div><div class="summary-val action-link" onclick="routeToReport('gameRevenueByMachine','ALL','全部游戏机','出点总数')">${sumData.point}</div></div>
+                    <div class="summary-item"><div class="summary-label">出礼品总数</div><div class="summary-val action-link" onclick="routeToReport('gameRevenueByMachine','ALL','全部游戏机','出礼品总数')">${sumData.gift}</div></div>
+                    <div class="summary-item"><div class="summary-label">未处理警报</div><div class="summary-val clickable-alarm" onclick="openModal('messageCenter')">${getUnreadMessageCount()}</div></div>
+                `;
+                section.appendChild(summaryBoard);
+            }
+
+            // 操作控制工具栏
+            const toolbar = document.createElement('div');
+            toolbar.className = 'game-toolbar';
+            const sortLabel = (key, label) => {
+                const active = currentGameSortKey === key;
+                const arrow = active ? (currentGameSortDir === 'desc' ? '↓' : '↑') : '↕';
+                return `<button class="sort-btn ${active ? 'active' : ''}" onclick="switchGameSort('${key}')">${label}<span class="sort-arrow">${arrow}</span></button>`;
+            };
+            toolbar.innerHTML = `
+                <div class="sub-tabs">
+                    <button class="sub-tab-btn ${currentGameSubView === 'type' ? 'active' : ''}" onclick="switchGameSubView('type')">按类型</button>
+                    <button class="sub-tab-btn ${currentGameSubView === 'station' ? 'active' : ''}" onclick="switchGameSubView('station')">按基站</button>
+                    <button class="sub-tab-btn ${currentGameSubView === 'model' ? 'active' : ''}" onclick="switchGameSubView('model')">按机种</button>
+                </div>
+                <div class="sort-bar ${currentGameSubView === 'model' ? 'hidden-element' : ''}">
+                    ${sortLabel('coin', '净投币')}
+                    ${sortLabel('ticket', '出彩票')}
+                    ${sortLabel('gift', '出礼品')}
+                    ${sortLabel('point', '出点')}
+                </div>
+            `;
+            if (currentTab !== 'all') section.appendChild(toolbar);
+
+            const sortedGames = getSortedFlatGames();
+
+            const viewForRender = currentTab === 'all' ? 'type' : currentGameSubView;
+
+            if (viewForRender === 'type') {
+                MOCK_DATA.game.types.forEach(group => {
+                    const groupBlock = document.createElement('div');
+                    groupBlock.style.marginBottom = '16px';
+                    groupBlock.innerHTML = `<div class="block-title" style="margin-bottom:10px;"><div class="title-left"><span>${group.name}</span><span class="group-header-tag ${group.tag}">ACTIVE</span></div></div>`;
+                    
+                    // 启用 5 列高密度矩阵
+                    const grid = document.createElement('div');
+                    grid.className = 'card-grid game-compact';
+                    
+                    sortedGames.filter(d => d.type === group.devices[0].type).forEach(dev => {
+                        grid.appendChild(buildGameCardDom(dev));
+                    });
+                    groupBlock.appendChild(grid);
+                    section.appendChild(groupBlock);
+                });
+            } else if (viewForRender === 'station') {
+                ["基站A", "基站B", "基站C"].forEach(stName => {
+                    const matchDevs = sortedGames.filter(d => d.station === stName);
+                    const groupBlock = document.createElement('div');
+                    groupBlock.style.marginBottom = '16px';
+                    groupBlock.innerHTML = `<div class="block-title" style="margin-bottom:10px;"><div class="title-left"><span>${stName} · 机组联机 (${matchDevs.length}台)</span></div></div>`;
+                    
+                    const grid = document.createElement('div');
+                    grid.className = 'card-grid game-compact';
+                    
+                    matchDevs.forEach(dev => grid.appendChild(buildGameCardDom(dev)));
+                    groupBlock.appendChild(grid);
+                    section.appendChild(groupBlock);
+                });
+            } else if (viewForRender === 'model') {
+                const modelGrid = document.createElement('div');
+                modelGrid.className = 'model-grid';
+
+                const models = getModelGroups();
+                models.forEach(m => modelGrid.appendChild(buildModelCardDom(m)));
+                section.appendChild(modelGrid);
+            }
+            return section;
+        }
+
+        function renderOfflineTab() {
+            const block = document.createElement('div');
+            const offCategories = [
+                { t: "收银终端断连", list: [{ n: "5号收银台", no: "C099", time: "2026-05-08 11:24", valid: true }] },
+                { t: "自助游艺断连", list: [{ n: "存票机03", no: "K099", time: "2026-04-02 09:12", valid: true }, { n: "失效取卡机", no: "K000", time: "2026-04-01 09:12", valid: false }] },
+                { t: "游艺机台断连", list: [{ n: "彩票机04", no: "G099", time: "2025-05-05 18:40", valid: true }, { n: "中性机03", no: "G098", time: "2025-01-02 14:22", valid: true }] },
+                { t: "大型项目断连", list: [{ n: "水上乐园主控", no: "P099", time: "2026-05-03 10:15", valid: true }] }
+            ];
+            offCategories.forEach(cat => {
+                const validList = cat.list.filter(d => d.valid !== false);
+                if (!validList.length) return;
+                const sec = document.createElement('div'); sec.className = 'block-section';
+                sec.innerHTML = `<div class="block-title" style="margin-bottom:10px;"><div class="title-left"><span>${cat.t}</span></div></div>`;
+                const grid = document.createElement('div'); grid.className = 'card-grid';
+                validList.forEach(d => {
+                    const card = document.createElement('div'); card.className = 'device-card offline';
+                    const iconClass = cat.t.includes("收银") ? "icon-cashier" : cat.t.includes("自助") ? "icon-self" : cat.t.includes("大型") ? "icon-project" : "icon-game";
+                    card.innerHTML = `<div class="card-header"><div class="card-title-group"><span class="device-icon ${iconClass}"></span><div class="device-name">${d.n}</div></div><div class="status-badge offline">离线</div></div><div class="device-no">${d.no}</div><div class="offline-placeholder">最后在线：${d.time}<br>已离线：${formatOfflineDuration(d.time)}</div>`;
+                    grid.appendChild(card);
+                });
+                sec.appendChild(grid); block.appendChild(sec);
+            });
+            return block;
+        }
+
+        function renderDashboard() {
+            const container = document.getElementById('dynamicContentBlock');
+            container.innerHTML = '';
+
+            if (currentTab === 'all') {
+                container.appendChild(createSectionBlock('cashier'));
+                container.appendChild(createSectionBlock('self'));
+                container.appendChild(createGameSectionBlock());
+                container.appendChild(createSectionBlock('project'));
+            } else if (['cashier', 'self', 'project'].includes(currentTab)) {
+                container.appendChild(createSectionBlock(currentTab));
+            } else if (currentTab === 'game') {
+                container.appendChild(createGameSectionBlock());
+            } else if (currentTab === 'offline') {
+                container.appendChild(renderOfflineTab());
+            }
+        }
+        
+        // 初始装载：打开页面即视为完成一次数据刷新，1分钟内再次点击刷新只给出提示。
+        updateRefreshTime();
+        renderDashboard();
+    </script>
+</body>
+</html>
