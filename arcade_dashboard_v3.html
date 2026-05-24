@@ -1024,7 +1024,7 @@
         // 全量真实底层数据集
         const MOCK_DATA = {
             cashier: {
-                title: "收银台区块", sub: "3 在线 / 4 台 · 当日实时数据",
+                title: "收银台", sub: "3 在线 / 4 台",
                 devices: [
                     { name: "1号收银台", no: "C001", online: true, reportKey: "sales", data: { "营业额": "¥12,580", "订单数": "186", "售币数": "3,200", "币余额": "1,800" } },
                     { name: "2号收银台", no: "C002", online: true, reportKey: "sales", data: { "营业额": "¥9,340", "订单数": "142", "售币数": "2,100", "币余额": "900" } },
@@ -1033,7 +1033,7 @@
                 ]
             },
             self: {
-                title: "自助机区块", sub: "10 在线 / 11 台 · 当日实时数据",
+                title: "自助机", sub: "10 在线 / 11 台",
                 devices: [
                     { name: "售币提币机01", no: "K001", online: true, reportKey: "sales", data: { "营业额": "¥8,200", "售币数": "1,500", "币余额": "800", "卡余额": "320" }, warns: [{t:"缺打印纸", c:"orange"}] },
                     { name: "售币提币机02", no: "K002", online: true, reportKey: "sales", data: { "营业额": "¥6,100", "售币数": "1,200", "币余额": "600", "卡余额": "180" }, warns: [{t:"通讯异常", c:"red"}] },
@@ -1745,14 +1745,20 @@
         function createGameSectionBlock() {
             const section = document.createElement('div');
             section.className = 'block-section';
+            const total = getSortedFlatGames().length;
 
             if (currentTab === 'all') {
-                const total = getSortedFlatGames().length;
                 const title = document.createElement('div');
                 title.className = 'block-title';
-                title.innerHTML = `<div class="title-left"><span>游戏机区块</span><span class="sub-txt">${total} 在线 / ${total} 台 · 按类型展示</span></div>`;
+                title.innerHTML = `<div class="title-left"><span>游戏机</span><span class="sub-txt">${total} 在线 / ${total} 台 · 按类型展示</span></div>`;
                 section.appendChild(title);
             } else {
+                if (currentGameSubView === 'type') {
+                    const title = document.createElement('div');
+                    title.className = 'block-title';
+                    title.innerHTML = `<div class="title-left"><span>游戏机</span><span class="sub-txt">${total} 在线 / ${total} 台 · 按类型展示</span></div>`;
+                    section.appendChild(title);
+                }
                 const sumData = MOCK_DATA.game.summary;
                 const summaryBoard = document.createElement('div');
                 summaryBoard.className = 'game-summary-board';
@@ -1837,10 +1843,10 @@
         function renderOfflineTab() {
             const block = document.createElement('div');
             const offCategories = [
-                { t: "收银终端断连", list: [{ n: "5号收银台", no: "C099", time: "2026-05-08 11:24", valid: true }] },
-                { t: "自助游艺断连", list: [{ n: "存票机03", no: "K099", time: "2026-04-02 09:12", valid: true }, { n: "失效取卡机", no: "K000", time: "2026-04-01 09:12", valid: false }] },
-                { t: "游艺机台断连", list: [{ n: "彩票机04", no: "G099", time: "2025-05-05 18:40", valid: true }, { n: "中性机03", no: "G098", time: "2025-01-02 14:22", valid: true }] },
-                { t: "大型项目断连", list: [{ n: "水上乐园主控", no: "P099", time: "2026-05-03 10:15", valid: true }] }
+                { t: "收银台", list: [{ n: "5号收银台", no: "C099", time: "2026-05-08 11:24", valid: true }] },
+                { t: "自助机", list: [{ n: "存票机03", no: "K099", time: "2026-04-02 09:12", valid: true }, { n: "失效取卡机", no: "K000", time: "2026-04-01 09:12", valid: false }] },
+                { t: "游戏机", list: [{ n: "彩票机04", no: "G099", time: "2025-05-05 18:40", valid: true }, { n: "中性机03", no: "G098", time: "2025-01-02 14:22", valid: true }] },
+                { t: "大项目", list: [{ n: "水上乐园主控", no: "P099", time: "2026-05-03 10:15", valid: true }] }
             ];
             offCategories.forEach(cat => {
                 const validList = cat.list.filter(d => d.valid !== false);
@@ -1850,7 +1856,7 @@
                 const grid = document.createElement('div'); grid.className = 'card-grid';
                 validList.forEach(d => {
                     const card = document.createElement('div'); card.className = 'device-card offline';
-                    const iconClass = cat.t.includes("收银") ? "icon-cashier" : cat.t.includes("自助") ? "icon-self" : cat.t.includes("大型") ? "icon-project" : "icon-game";
+                    const iconClass = cat.t.includes("收银") ? "icon-cashier" : cat.t.includes("自助") ? "icon-self" : cat.t.includes("大项目") ? "icon-project" : "icon-game";
                     card.innerHTML = `<div class="card-header"><div class="card-title-group"><span class="device-icon ${iconClass}"></span><div class="device-name">${d.n}</div></div><div class="status-badge offline">离线</div></div><div class="device-no">${d.no}</div><div class="offline-placeholder">最后在线：${d.time}<br>已离线：${formatOfflineDuration(d.time)}</div>`;
                     grid.appendChild(card);
                 });
