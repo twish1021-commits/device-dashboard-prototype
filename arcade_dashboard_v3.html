@@ -522,8 +522,8 @@
 
         /* 紧凑数据双列布局 */
         .card-data-zone {
-            display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 36px; gap: 5px 8px; font-size: 14px;
-            background: #f8fafc; padding: 7px; border-radius: 5px; margin-bottom: 5px;
+            display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 42px; gap: 8px 10px; font-size: 14px;
+            background: #f8fafc; padding: 9px; border-radius: 5px; margin-bottom: 5px;
             min-height: 98px;
             align-content: start;
         }
@@ -531,8 +531,8 @@
             height: 158px;
             min-height: 158px;
         }
-        .data-item { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
-        .data-label { color: var(--neutral-gray); font-size: 13px; margin-bottom: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .data-item { display: flex; flex-direction: column; justify-content: center; gap: 5px; min-width: 0; }
+        .data-label { color: var(--neutral-gray); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .data-val {
             width: fit-content;
             max-width: 100%;
@@ -962,7 +962,7 @@
             <div class="page-header">
                 <div class="page-title">设备看板</div>
                 <div class="header-controls">
-                    <div class="time-filter" id="topTimeFilter">
+                    <div class="time-filter" id="topTimeFilter" style="display:none;">
                         <button class="time-btn active" onclick="switchTime(this)">今日</button>
                         <button class="time-btn" onclick="switchTime(this)">昨日</button>
                         <button class="time-btn" onclick="switchTime(this)">本周</button>
@@ -1060,9 +1060,9 @@
                     },
                     {
                         name: "彩票机", tag: "tag-cp", devices: [
-                            { name: "彩票机01", no: "G004", online: true, type: "cp", pCount: 2, coin: 1920, ticket: 840, point: 0, alarm: true, activeField: "ticket", dataset: { ticket: { "净投币数": "1,920", "出票数": "8,400", "每币奖票数": "4.38" }, point: { "投币数": "2,100", "出点数": "180", "出蓝票数": "320", "差额": "1,600", "盈币率": "76.2%" } }, station: "基站B", model: "彩票机A" },
-                            { name: "彩票机02", no: "G005", online: true, type: "cp", pCount: 2, coin: 1710, ticket: 720, point: 0, activeField: "ticket", dataset: { ticket: { "净投币数": "1,710", "出票数": "7,200", "每币奖票数": "4.21" }, point: { "投币数": "1,860", "出点数": "150", "出蓝票数": "280", "差额": "1,430", "盈币率": "76.9%" } }, station: "基站C", model: "彩票机A" },
-                            { name: "彩票机03", no: "G006", online: true, type: "cp", pCount: 2, coin: 1420, ticket: 610, point: 0, activeField: "ticket", dataset: { ticket: { "净投币数": "1,420", "出票数": "6,100", "每币奖票数": "4.30" }, point: { "投币数": "1,540", "出点数": "120", "出蓝票数": "210", "差额": "1,210", "盈币率": "78.6%" } }, station: "基站C", model: "彩票机B" }
+                            { name: "彩票机01", no: "G004", online: true, type: "cp", pCount: 2, coin: 2100, ticket: 8400, point: 180, alarm: true, activeField: "default", dataset: { default: { "投币数": "2,100", "出票数": "8,400", "出点数": "180", "每币奖票数": "4.38" } }, station: "基站B", model: "彩票机A" },
+                            { name: "彩票机02", no: "G005", online: true, type: "cp", pCount: 2, coin: 1860, ticket: 7200, point: 150, activeField: "default", dataset: { default: { "投币数": "1,860", "出票数": "7,200", "出点数": "150", "每币奖票数": "4.21" } }, station: "基站C", model: "彩票机A" },
+                            { name: "彩票机03", no: "G006", online: true, type: "cp", pCount: 2, coin: 1540, ticket: 6100, point: 120, activeField: "default", dataset: { default: { "投币数": "1,540", "出票数": "6,100", "出点数": "120", "每币奖票数": "4.30" } }, station: "基站C", model: "彩票机B" }
                         ]
                     },
                     {
@@ -1073,9 +1073,9 @@
                     },
                     {
                         name: "礼品机", tag: "tag-lp", devices: [
-                            { name: "礼品机01", no: "G009", online: true, type: "lp", pCount: 1, coin: 3200, gift: 42, activeField: "qty", dataset: { qty: { "投币数": "3,200", "出礼品数": "42", "出礼品币数": "76.2", "出礼品局数": "9.5" }, rate: { "投币价值": "¥1,600", "出礼品价值": "¥357", "返还率": "22.3%" } }, station: "基站C", model: "礼品机A" },
-                            { name: "礼品机02", no: "G010", online: true, type: "lp", pCount: 1, coin: 2800, gift: 36, alarm: true, activeField: "qty", dataset: { qty: { "投币数": "2,800", "出礼品数": "36", "出礼品币数": "77.8", "出礼品局数": "9.7" }, rate: { "投币价值": "¥1,400", "出礼品价值": "¥306", "返还率": "21.9%" } }, station: "基站A", model: "礼品机A" },
-                            { name: "礼品机03", no: "G011", online: true, type: "lp", pCount: 1, coin: 0, gift: 0, activeField: "qty", dataset: { qty: { "投币数": "0", "出礼品数": "0", "出礼品币数": "--", "出礼品局数": "--" }, rate: { "投币价值": "¥0", "出礼品价值": "¥0", "返还率": "--" } }, station: "基站B", model: "礼品机B" }
+                            { name: "礼品机01", no: "G009", online: true, type: "lp", pCount: 1, coin: 3200, gift: 42, activeField: "default", dataset: { default: { "投币数": "3,200", "出礼品数": "42", "出礼品局数": "9.5", "返还率": "22.3%" } }, station: "基站C", model: "礼品机A" },
+                            { name: "礼品机02", no: "G010", online: true, type: "lp", pCount: 1, coin: 2800, gift: 36, alarm: true, activeField: "default", dataset: { default: { "投币数": "2,800", "出礼品数": "36", "出礼品局数": "9.7", "返还率": "21.9%" } }, station: "基站A", model: "礼品机A" },
+                            { name: "礼品机03", no: "G011", online: true, type: "lp", pCount: 1, coin: 0, gift: 0, activeField: "default", dataset: { default: { "投币数": "0", "出礼品数": "0", "出礼品局数": "--", "返还率": "--" } }, station: "基站B", model: "礼品机B" }
                         ]
                     }
                 ]
@@ -1093,12 +1093,12 @@
 
         const GAME_TYPE_META = {
             mn: { label: "模拟机", className: "card-mn", fields: ["投币数"] },
-            cp: { label: "彩票机", className: "card-cp", fields: ["净投币数", "出票数", "每币奖票数", "投币数", "出点数", "出蓝票数", "差额", "盈币率"] },
+            cp: { label: "彩票机", className: "card-cp", fields: ["投币数", "出票数", "出点数", "每币奖票数"] },
             zx: { label: "中性机", className: "card-zx", fields: ["投币数", "出点数", "差额", "盈币率"] },
-            lp: { label: "礼品机", className: "card-lp", fields: ["投币数", "出礼品数", "出礼品币数", "出礼品局数", "投币价值", "出礼品价值", "返还率"] }
+            lp: { label: "礼品机", className: "card-lp", fields: ["投币数", "出礼品数", "出礼品局数", "返还率"] }
         };
 
-        const GAME_REPORT_METRICS = new Set(["投币数", "净投币数", "出点数", "出票数", "出蓝票数", "每币奖票数", "盈币率", "出礼品数", "出礼品币数", "出礼品局数", "投币价值", "出礼品价值", "返还率"]);
+        const GAME_REPORT_METRICS = new Set(["投币数", "出票数", "出点数", "每币奖票数", "出礼品数", "出礼品局数", "返还率", "差额", "盈币率"]);
 
         const REPORT_DEFINITIONS = {
             sales: {
@@ -1163,7 +1163,7 @@
             },
             gameRevenueByMachine: {
                 title: "游戏机盈收分析",
-                tabs: ["明细", "按天汇总", "按月汇总", "按机位汇总", "按游戏机汇总", "按游戏机分类汇总"],
+                tabs: ["按游戏机汇总"],
                 activeTab: "按游戏机汇总",
                 hidden: ["开始营业日期", "结束营业日期", "合作商"],
                 filters: ["开始营业日期", "结束营业日期", "游戏机", "游戏机分类", "营收分类", "合作商", "显示无记录机台"],
@@ -1187,9 +1187,9 @@
         const MODAL_TEMPLATES = {
             pPosition: {
                 mn: `<table class="proto-table"><thead><tr><th>P位</th><th>投币数</th></tr></thead><tbody><tr><td>1P</td><td>1,240</td></tr></tbody></table>`,
-                cp: `<table class="proto-table"><thead><tr><th>P位</th><th>净投币</th><th>出票数</th><th>每币奖票</th><th>投币数</th><th>出点数</th><th>出蓝票数</th><th>差额</th><th>盈币率</th></tr></thead><tbody><tr><td>1P</td><td>1,020</td><td>4,500</td><td>4.41</td><td>1,100</td><td>80</td><td>170</td><td>850</td><td>77.3%</td></tr><tr><td>2P</td><td>900</td><td>3,900</td><td>4.33</td><td>1,000</td><td>100</td><td>150</td><td>750</td><td>75.0%</td></tr></tbody></table>`,
+                cp: `<table class="proto-table"><thead><tr><th>P位</th><th>投币数</th><th>出票数</th><th>出点数</th><th>每币奖票数</th></tr></thead><tbody><tr><td>1P</td><td>1,100</td><td>4,500</td><td>80</td><td>4.38</td></tr><tr><td>2P</td><td>1,000</td><td>3,900</td><td>100</td><td>4.38</td></tr></tbody></table>`,
                 zx: `<table class="proto-table"><thead><tr><th>P位</th><th>投币数</th><th>出点数</th><th>差额</th><th>盈币率</th></tr></thead><tbody><tr><td>1P</td><td>900</td><td>160</td><td>740</td><td>82.2%</td></tr></tbody></table>`,
-                lp: `<table class="proto-table"><thead><tr><th>P位</th><th>投币数</th><th>出礼品数</th><th>出礼品币数</th><th>投币价值</th><th>出礼品价值</th><th>返还率</th></tr></thead><tbody><tr><td>1P</td><td>1,600</td><td>21</td><td>76.2</td><td>¥800</td><td>¥178</td><td>22.3%</td></tr></tbody></table>`
+                lp: `<table class="proto-table"><thead><tr><th>P位</th><th>投币数</th><th>出礼品数</th><th>出礼品局数</th><th>返还率</th></tr></thead><tbody><tr><td>1P</td><td>3,200</td><td>42</td><td>9.5</td><td>22.3%</td></tr></tbody></table>`
             },
             metricDoc: `
                 <div class="metric-doc">
@@ -1266,7 +1266,7 @@
             currentTab = tabKey;
             document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
             element.classList.add('active');
-            document.getElementById('topTimeFilter').style.display = (tabKey === 'game' || tabKey === 'project') ? 'flex' : 'none';
+            document.getElementById('topTimeFilter').style.display = tabKey === 'project' ? 'flex' : 'none';
             renderDashboard();
         }
 
@@ -1299,7 +1299,7 @@
         }
         function getCurrentBoardTimeLabel() {
             const activeBtn = document.querySelector('#topTimeFilter button.active');
-            if (currentTab === 'game' || currentTab === 'project') return activeBtn ? activeBtn.innerText : '今日';
+            if (currentTab === 'project') return activeBtn ? activeBtn.innerText : '今日';
             return '今日';
         }
 
@@ -1373,12 +1373,10 @@
             const def = REPORT_DEFINITIONS[context.reportKey];
             if (!def) return `<div class="report-empty">未配置报表模板</div>`;
             const tabs = def.tabs.map((tab, index) => `<span class="report-tab ${(def.activeTab ? tab === def.activeTab : index === 0) ? 'active' : ''}">${tab}</span>`).join("");
-            const metricChip = context.metricName ? `<span class="context-chip">点击指标：${context.metricName}</span>` : "";
             return `
                 <div class="report-context">
                     <span class="context-chip">看板时间：${getCurrentBoardTimeLabel()}</span>
                     <span class="context-chip">当前设备：${context.deviceName}（${context.deviceNo}）</span>
-                    ${metricChip}
                 </div>
                 ${buildReportFilters(def, context)}
                 <div class="report-tabs">${tabs}</div>
@@ -1464,7 +1462,8 @@
 
             if (mode === 'pPosition') {
                 wrapper.style.width = '580px'; title.innerText = name;
-                body.innerHTML = MODAL_TEMPLATES.pPosition[typeKey] || MODAL_TEMPLATES.pPosition['mn'];
+                const device = findGameDeviceByName(name);
+                body.innerHTML = device ? buildPPositionTable(device) : (MODAL_TEMPLATES.pPosition[typeKey] || MODAL_TEMPLATES.pPosition['mn']);
             } else if (mode === 'modelDetail') {
                 const modelGroup = getModelGroups().find(m => m.name === name);
                 wrapper.style.width = '860px'; title.innerText = name;
@@ -1512,9 +1511,8 @@
                     bodyHtml = `<div class="card-data-zone">`;
                     for (let [lbl, val] of Object.entries(dev.data || {})) {
                         if (isProjectTimeActive && lbl === '在场人数') val = '--';
-                        const clickable = !!dev.reportKey && val !== '--';
-                        let valClass = clickable ? 'data-val clickable' : (dev.special === lbl) ? 'data-val blue-highlight' : 'data-val';
-                        const action = clickable ? ` onclick="routeToReport('${dev.reportKey}','${dev.no}','${dev.name}','${lbl}')"` : '';
+                        let valClass = (dev.special === lbl) ? 'data-val blue-highlight' : 'data-val';
+                        const action = '';
                         bodyHtml += `<div class="data-item"><span class="data-label">${lbl}</span><span class="${valClass}"${action}>${val}</span></div>`;
                     }
                     bodyHtml += `</div>`;
@@ -1548,6 +1546,10 @@
             return list;
         }
 
+        function findGameDeviceByName(name) {
+            return getSortedFlatGames().find(dev => dev.name === name || dev.no === name);
+        }
+
         function parseMetricNumber(val) {
             if (val === undefined || val === null || val === '--') return 0;
             return Number(String(val).replace(/[¥,%人,]/g, '')) || 0;
@@ -1563,8 +1565,8 @@
                 if (Object.prototype.hasOwnProperty.call(pool, label)) return pool[label];
             }
             if (label === "出礼品数") return dev.gift || 0;
-            if (label === "出票数") return dev.ticket ? dev.ticket * 10 : 0;
-            if (label === "净投币数" || label === "投币数") return dev.coin || 0;
+            if (label === "出票数") return dev.ticket || 0;
+            if (label === "投币数") return dev.coin || 0;
             if (label === "差额" || label === "出点数") return dev.point || 0;
             return "--";
         }
@@ -1588,21 +1590,14 @@
             const sum = label => group.devices.reduce((total, dev) => total + parseMetricNumber(getDeviceMetric(dev, label)), 0);
             if (group.type === "mn") return [{ label: "投币数", value: formatNumber(sum("投币数")) }];
             if (group.type === "cp") {
-                const netCoin = sum("净投币数");
                 const tickets = sum("出票数");
                 const coin = sum("投币数");
                 const point = sum("出点数");
-                const blueTicket = sum("出蓝票数");
-                const diff = coin - point - blueTicket;
                 return [
-                    { label: "净投币数", value: formatNumber(netCoin) },
-                    { label: "出票数", value: formatNumber(tickets) },
-                    { label: "每币奖票数", value: netCoin ? (tickets / netCoin).toFixed(2) : "--" },
                     { label: "投币数", value: formatNumber(coin) },
+                    { label: "出票数", value: formatNumber(tickets) },
                     { label: "出点数", value: formatNumber(point) },
-                    { label: "出蓝票数", value: formatNumber(blueTicket) },
-                    { label: "差额", value: formatNumber(diff) },
-                    { label: "盈币率", value: coin ? `${((diff / coin) * 100).toFixed(1)}%` : "--" }
+                    { label: "每币奖票数", value: coin ? (tickets / coin).toFixed(2) : "--" }
                 ];
             }
             if (group.type === "zx") {
@@ -1618,16 +1613,13 @@
             }
             const coin = sum("投币数");
             const gifts = sum("出礼品数");
-            const coinValue = sum("投币价值");
-            const giftValue = sum("出礼品价值");
+            const rateTotal = group.devices.reduce((total, dev) => total + parseMetricNumber(getDeviceMetric(dev, "返还率")), 0);
+            const rateCount = group.devices.filter(dev => getDeviceMetric(dev, "返还率") !== "--").length;
                 return [
                     { label: "投币数", value: formatNumber(coin) },
                     { label: "出礼品数", value: formatNumber(gifts) },
-                    { label: "出礼品币数", value: gifts ? (coin / gifts).toFixed(1) : "--" },
                     { label: "出礼品局数", value: gifts ? ((coin / gifts) / 8).toFixed(1) : "--" },
-                    { label: "投币价值", value: `¥${formatNumber(coinValue)}` },
-                    { label: "出礼品价值", value: `¥${formatNumber(giftValue)}` },
-                    { label: "返还率", value: coinValue ? `${((giftValue / coinValue) * 100).toFixed(1)}%` : "--" }
+                    { label: "返还率", value: rateCount ? `${(rateTotal / rateCount).toFixed(1)}%` : "--" }
             ];
         }
 
@@ -1638,31 +1630,19 @@
             }, {});
             if (group.type === 'cp') {
                 return {
-                    ticket: {
-                        "净投币数": metrics["净投币数"],
-                        "出票数": metrics["出票数"],
-                        "每币奖票数": metrics["每币奖票数"]
-                    },
-                    point: {
+                    default: {
                         "投币数": metrics["投币数"],
+                        "出票数": metrics["出票数"],
                         "出点数": metrics["出点数"],
-                        "出蓝票数": metrics["出蓝票数"],
-                        "差额": metrics["差额"],
-                        "盈币率": metrics["盈币率"]
+                        "每币奖票数": metrics["每币奖票数"]
                     }
                 };
             }
             if (group.type === 'lp') {
                 return {
-                    qty: {
+                    default: {
                         "投币数": metrics["投币数"],
                         "出礼品数": metrics["出礼品数"],
-                        "出礼品币数": metrics["出礼品币数"],
-                        "出礼品局数": metrics["出礼品局数"]
-                    },
-                    rate: {
-                        "投币价值": metrics["投币价值"],
-                        "出礼品价值": metrics["出礼品价值"],
                         "返还率": metrics["返还率"]
                     }
                 };
@@ -1675,7 +1655,7 @@
                 name: group.name,
                 no: group.name,
                 type: group.type,
-                activeField: group.activeField || (group.type === 'cp' ? 'ticket' : group.type === 'lp' ? 'qty' : 'default'),
+                activeField: 'default',
                 dataset: getModelDataset(group),
                 alarm: group.devices.some(d => d.alarm)
             };
@@ -1718,6 +1698,13 @@
                 return `<table class="proto-table"><thead><tr>${columns.map(c => `<th>${c}</th>`).join("")}</tr></thead><tbody>${rows.map(row => `<tr>${columns.map(c => `<td>${row[c] ?? "--"}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
         }
 
+        function buildPPositionTable(dev) {
+            const meta = GAME_TYPE_META[dev.type];
+            const columns = ["P位", ...meta.fields];
+            const rows = buildPRowsForDevice(dev);
+            return `<table class="proto-table"><thead><tr>${columns.map(c => `<th>${c}</th>`).join("")}</tr></thead><tbody>${rows.map(row => `<tr>${columns.map(c => `<td>${row[c] ?? "--"}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+        }
+
         // 构建带微切换功能的游戏机卡片
         function buildGameCardDom(dev) {
             const card = document.createElement('div');
@@ -1725,26 +1712,11 @@
 
             let headerHtml = `<div class="card-header"><div class="card-title-group"><span class="device-icon icon-game"></span><div class="device-name action-link" onclick="openModal('pPosition', '${dev.name}', '${dev.type}')">${dev.name}</div></div>${dev.alarm ? `<div class="alarm-badge-click" onclick="event.stopPropagation(); openModal('alarms', '${dev.name}', '')">异常 2</div>` : ''}</div><div class="device-no">${dev.no}</div>`;
             if (dev.pCount) {
-                headerHtml = `<div class="card-header"><div class="card-title-group"><span class="device-icon icon-game"></span><div class="device-name action-link" onclick="openModal('pPosition', '${dev.name}', '${dev.type}')">${dev.name}</div></div>${dev.alarm ? `<div class="alarm-badge-click" onclick="event.stopPropagation(); openModal('alarms', '${dev.name}', '')">异常 2</div>` : ''}</div><div class="device-meta-row"><div class="device-no">${dev.no}</div><span class="p-count-tag">P位:${dev.pCount}</span></div>`;
+                headerHtml = `<div class="card-header"><div class="card-title-group"><span class="device-icon icon-game"></span><div class="device-name action-link" onclick="openModal('pPosition', '${dev.name}', '${dev.type}')">${dev.name}</div></div>${dev.alarm ? `<div class="alarm-badge-click" onclick="event.stopPropagation(); openModal('alarms', '${dev.name}', '')">异常 2</div>` : ''}</div><div class="device-meta-row"><div class="device-no">${dev.no}</div><span class="p-count-tag">P位数:${dev.pCount}</span></div>`;
             }
             
             // 数据层：微切组件拦截
             let switcherHtml = '';
-            if (dev.type === 'cp') {
-                switcherHtml = `
-                    <div class="card-micro-switcher">
-                        <button class="micro-tab ${dev.activeField === 'ticket' ? 'active' : ''}" onclick="toggleMicroTab(event,'${dev.no}','ticket')">出票数据</button>
-                        <button class="micro-tab ${dev.activeField === 'point' ? 'active' : ''}" onclick="toggleMicroTab(event,'${dev.no}','point')">出点数据</button>
-                    </div>
-                `;
-            } else if (dev.type === 'lp') {
-                switcherHtml = `
-                    <div class="card-micro-switcher">
-                        <button class="micro-tab ${dev.activeField === 'qty' ? 'active' : ''}" onclick="toggleMicroTab(event,'${dev.no}','qty')">出礼品数</button>
-                        <button class="micro-tab ${dev.activeField === 'rate' ? 'active' : ''}" onclick="toggleMicroTab(event,'${dev.no}','rate')">返还率</button>
-                    </div>
-                `;
-            }
 
             let fieldsToRender = dev.dataset[dev.activeField];
             let bodyHtml = `<div class="card-data-zone">`;
