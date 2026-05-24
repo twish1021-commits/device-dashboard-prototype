@@ -1753,12 +1753,6 @@
                 title.innerHTML = `<div class="title-left"><span>游戏机</span><span class="sub-txt">${total} 在线 / ${total} 台 · 按类型展示</span></div>`;
                 section.appendChild(title);
             } else {
-                if (currentGameSubView === 'type') {
-                    const title = document.createElement('div');
-                    title.className = 'block-title';
-                    title.innerHTML = `<div class="title-left"><span>游戏机</span><span class="sub-txt">${total} 在线 / ${total} 台 · 按类型展示</span></div>`;
-                    section.appendChild(title);
-                }
                 const sumData = MOCK_DATA.game.summary;
                 const summaryBoard = document.createElement('div');
                 summaryBoard.className = 'game-summary-board';
@@ -1801,15 +1795,16 @@
 
             if (viewForRender === 'type') {
                 MOCK_DATA.game.types.forEach(group => {
+                    const groupDevices = sortedGames.filter(d => d.type === group.devices[0].type);
                     const groupBlock = document.createElement('div');
                     groupBlock.style.marginBottom = '16px';
-                    groupBlock.innerHTML = `<div class="block-title" style="margin-bottom:10px;"><div class="title-left"><span>${group.name}</span><span class="group-header-tag ${group.tag}">ACTIVE</span></div></div>`;
+                    groupBlock.innerHTML = `<div class="block-title" style="margin-bottom:10px;"><div class="title-left"><span>${group.name}</span><span class="sub-txt">${groupDevices.length} 在线 / ${groupDevices.length} 台</span></div></div>`;
                     
                     // 启用 5 列高密度矩阵
                     const grid = document.createElement('div');
                     grid.className = 'card-grid game-compact';
                     
-                    sortedGames.filter(d => d.type === group.devices[0].type).forEach(dev => {
+                    groupDevices.forEach(dev => {
                         grid.appendChild(buildGameCardDom(dev));
                     });
                     groupBlock.appendChild(grid);
