@@ -229,7 +229,7 @@
         .user-info { font-size: 14px; color: #ffffff; font-weight: 600; }
 
         .content-body {
-            padding: 20px 24px;
+            padding: 0 24px 20px;
             overflow-y: auto;
             flex-grow: 1;
         }
@@ -269,6 +269,14 @@
         }
 
         /* 顶部标题与控制组件 */
+        .dashboard-sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            padding-top: 20px;
+            padding-bottom: 1px;
+            background: var(--neutral-light);
+        }
         .page-header {
             display: flex;
             justify-content: space-between;
@@ -958,7 +966,7 @@
         </div>
 
         <div class="content-body">
-            
+            <div class="dashboard-sticky-header">
             <div class="page-header">
                 <div class="page-title">设备看板</div>
                 <div class="header-controls">
@@ -986,6 +994,7 @@
                     <div class="tab-item badge-dot" onclick="switchMainTab('offline', this)">离线设备</div>
                 </div>
                 <button class="data-note-btn" onclick="openModal('metricDoc')">看板取数说明</button>
+            </div>
             </div>
 
             <div id="dynamicContentBlock"></div>
