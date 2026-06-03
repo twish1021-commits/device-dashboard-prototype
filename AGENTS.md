@@ -13,11 +13,12 @@
 
 ## Git 同步方式
 - Codex 负责改文件、同步相关文档、列出本次应提交文件和 Git 命令。
-- 当前环境下 Codex 不直接执行 `git add`、`git commit`、`git push`；由 CZF 在本地 PowerShell 执行。
+- Codex 可在 CZF 明确确认后执行 `git add`、`git commit`、`git push`。
+- 未获得 CZF 对本次提交和推送的明确确认前，Codex 只列出命令，不直接执行。
 - 原型改动通常需要提交：`arcade_dashboard_v3.html`、`index.html`、`设备看板需求文档.txt`、`设备看板原型设计描述.txt`。
 - 规则或协作方式改动需要额外提交：`AGENTS.md`。
 - 仅文档改动时，只提交实际修改的文档，不带无关文件。
-- Codex 最终回复必须给出可直接复制执行的 Git 命令。
+- Codex 最终回复必须说明已执行或待执行的 Git 操作；未执行时必须给出可直接复制执行的 Git 命令。
 
 ## 文件约定
 - 页面原型文件使用 `.html`。
