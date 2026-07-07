@@ -485,6 +485,22 @@
         }
         .device-name.action-link:hover { color: var(--primary-hover); }
         .device-no { font-size: 13px; color: var(--neutral-gray); margin-bottom: 6px; }
+        .device-no-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        .device-no-row .device-no { margin-bottom: 0; }
+        .card-status-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .device-version { font-size: 12px; color: var(--neutral-sub); line-height: 1; white-space: nowrap; }
         .device-meta-row {
             display: flex;
             align-items: center;
@@ -1044,17 +1060,17 @@
             self: {
                 title: "自助机", sub: "10 在线 / 11 台",
                 devices: [
-                    { name: "售币提币机01", no: "K001", online: true, reportKey: "sales", data: { "营业额": "¥8,200", "售币数": "1,500", "币余额": "800", "卡余额": "320" }, warns: [{t:"缺打印纸", c:"orange"}] },
-                    { name: "售币提币机02", no: "K002", online: true, reportKey: "sales", data: { "营业额": "¥6,100", "售币数": "1,200", "币余额": "600", "卡余额": "180" }, warns: [{t:"通讯异常", c:"red"}] },
-                    { name: "存币机01", no: "K003", online: true, reportKey: "memberDepositCoin", data: { "存币数": "2,340" }, warns: [{t:"存币桶满", c:"orange"}] },
-                    { name: "存票机01", no: "K004", online: true, reportKey: "physicalTicketDeposit", data: { "存票数": "18,600" } },
+                    { name: "售币提币机01", no: "K001", online: true, version: "V1.0.0", reportKey: "sales", data: { "营业额": "¥8,200", "售币数": "1,500", "币余额": "800", "卡余额": "320" }, warns: [{t:"缺打印纸", c:"orange"}] },
+                    { name: "售币提币机02", no: "K002", online: true, version: "V1.0.1", reportKey: "sales", data: { "营业额": "¥6,100", "售币数": "1,200", "币余额": "600", "卡余额": "180" }, warns: [{t:"通讯异常", c:"red"}] },
+                    { name: "存币机01", no: "K003", online: true, version: "V1.0.0", reportKey: "memberDepositCoin", data: { "存币数": "2,340" }, warns: [{t:"存币桶满", c:"orange"}] },
+                    { name: "存票机01", no: "K004", online: true, version: "", reportKey: "physicalTicketDeposit", data: { "存票数": "18,600" } },
                     { name: "存票机02", no: "K005", online: false, lastOnline: "2026-05-20 18:35" },
-                    { name: "售珠提珠机01", no: "K006", online: true, reportKey: "sales", data: { "营业额": "¥3,200", "售珠数": "480", "存珠数": "120", "珠余额": "360" }, warns: [{t:"缺打印纸", c:"orange"}, {t:"存珠桶满", c:"orange"}] },
-                    { name: "手持机01", no: "K007", online: true, reportKey: "sales", data: { "营业额": "¥2,100" } },
-                    { name: "取卡机01", no: "K008", online: true, data: { "出卡数": "580", "卡余额": "420" } },
-                    { name: "抽奖机01", no: "K009", online: true, reportKey: "lotteryMachineRecord", data: { "抽奖次数": "1,240", "出奖次数": "186" } },
-                    { name: "娃娃回收机01", no: "K010", online: true, reportKey: "giftRecycleRecord", data: { "收娃娃数": "68" } },
-                    { name: "快投王01", no: "K011", online: true, reportKey: "quickThrowRecord", data: { "投实物币": "3,200", "投电子币": "1,800", "投币总数": "5,000" }, special: "投币总数" }
+                    { name: "售珠提珠机01", no: "K006", online: true, version: "V1.0.2", reportKey: "sales", data: { "营业额": "¥3,200", "售珠数": "480", "存珠数": "120", "珠余额": "360" }, warns: [{t:"缺打印纸", c:"orange"}, {t:"存珠桶满", c:"orange"}] },
+                    { name: "手持机01", no: "K007", online: true, version: "V1.0.0", reportKey: "sales", data: { "营业额": "¥2,100" } },
+                    { name: "取卡机01", no: "K008", online: true, version: "V1.1.0", data: { "出卡数": "580", "卡余额": "420" } },
+                    { name: "抽奖机01", no: "K009", online: true, version: "V1.0.0", reportKey: "lotteryMachineRecord", data: { "抽奖次数": "1,240", "出奖次数": "186" } },
+                    { name: "娃娃回收机01", no: "K010", online: true, version: "V1.0.0", reportKey: "giftRecycleRecord", data: { "收娃娃数": "68" } },
+                    { name: "快投王01", no: "K011", online: true, version: "V1.2.0", reportKey: "quickThrowRecord", data: { "投实物币": "3,200", "投电子币": "1,800", "投币总数": "5,000" }, special: "投币总数" }
                 ]
             },
             game: {
@@ -1513,7 +1529,12 @@
 
                 const nameClass = dev.online && dev.reportKey ? 'device-name action-link' : 'device-name';
                 const nameAction = dev.online && dev.reportKey ? ` onclick="routeToReport('${dev.reportKey}','${dev.no}','${dev.name}')"` : '';
-                let headerHtml = `<div class="card-header"><div class="card-title-group"><span class="device-icon ${getDeviceIconClass(type)}"></span><div class="${nameClass}"${nameAction}>${dev.name}</div></div><div class="status-badge ${dev.online ? 'online' : 'offline'}">${dev.online ? '在线' : '离线'}</div></div><div class="device-no">${dev.no}</div>`;
+                const versionHtml = type === 'self' && dev.online ? `<div class="device-version">${dev.version || 'V--'}</div>` : '';
+                const statusHtml = `<div class="card-status-group"><div class="status-badge ${dev.online ? 'online' : 'offline'}">${dev.online ? '在线' : '离线'}</div></div>`;
+                const noHtml = type === 'self' && dev.online
+                    ? `<div class="device-no-row"><div class="device-no">${dev.no}</div>${versionHtml}</div>`
+                    : `<div class="device-no">${dev.no}</div>`;
+                let headerHtml = `<div class="card-header"><div class="card-title-group"><span class="device-icon ${getDeviceIconClass(type)}"></span><div class="${nameClass}"${nameAction}>${dev.name}</div></div>${statusHtml}</div>${noHtml}`;
                 let bodyHtml = '';
                 if (!dev.online) { bodyHtml = `<div class="offline-placeholder">最后在线：${dev.lastOnline || '--'}</div>`; } 
                 else {
